@@ -1,0 +1,10 @@
+<launch>
+       
+<node name="test_fcl_inter"
+    pkg="ros_collision_checking" 
+    type="test_fcl_inter"
+    respawn="false" output="screen"  clear_params="true"
+	launch-prefix="valgrind --track-origins=yes">
+   </node>
+</launch>
+
