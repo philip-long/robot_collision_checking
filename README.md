@@ -5,11 +5,11 @@ This package requires
  * fcl > 6.0 [FCL](http://www.ros.org/wiki/fcl) 
  * [libccd](https://github.com/danfis/libccd) 
  
-## Installing FCL & CDD
+## Installing FCL & CCD
 The binaries FCL 5.0 should be already installed on ros kinetic, but we can't use them, likewise libccd-dev may already be installed but we need to reinstall from source.  Ensure this option is enabled, when compiling: 
 >> -DENABLE_DOUBLE_PRECISION=ON
 
-### LIBCDD
+### LIBCCD
 1. git clone clone https://github.com/danfis/libccd.git
 2. mkdir build && cd build
 3. cmake -G "Unix Makefiles" -DENABLE_DOUBLE_PRECISION=ON ..
