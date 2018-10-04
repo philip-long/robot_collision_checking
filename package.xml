@@ -7,7 +7,7 @@
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="philip@todo.todo">philip</maintainer>
+  <maintainer email="p.long@northeastern.edu">Philip Long</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -49,31 +49,34 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
-  <build_depend>geometry_msgs</build_depend>
-  <build_depend>shape_msgs</build_depend>
-  <build_depend>roscpp</build_depend>
-  <build_depend>rospy</build_depend>
-  <build_depend>roslib</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>libfcl-dev</build_depend>
-  <build_depend>geometric_shapes</build_depend>
-  
-  <build_export_depend>shape_msgs</build_export_depend>
+  <depend>geometry_msgs</depend>
+  <depend>shape_msgs</depend>
+  <depend>roscpp</depend>
+  <depend>rospy</depend>
+  <depend>roslib</depend>
+  <depend>std_msgs</depend>
+  <depend>libfcl-dev</depend>
+  <depend>geometric_shapes</depend>
+  <depend>eigen</depend>
+  <build_depend>cmake_modules</build_depend>
+
+  <!-- <build_export_depend>shape_msgs</build_export_depend>
   <build_export_depend>geometry_msgs</build_export_depend>
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>rospy</build_export_depend>
   <build_export_depend>roslib</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
   <build_export_depend>geometric_shapes</build_export_depend>
-  <build_export_depend>libfcl-dev</build_export_depend>
-  
+  <build_export_depend>libfcl-dev</build_export_depend> -->
+<!--
   <exec_depend>shape_msgs</exec_depend>
   <exec_depend>roscpp</exec_depend>
+  <exec_depend>eigen</exec_depend>
   <exec_depend>rospy</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>roslib</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>geometric_shapes</exec_depend>
+  <exec_depend>geometric_shapes</exec_depend> -->
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>
