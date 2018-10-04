@@ -15,7 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   eigen_conversions
   geometric_shapes
-    ${MSG_DEPS}
+  ${MSG_DEPS}
   )
 find_package(CCD REQUIRED)
 
@@ -35,10 +35,9 @@ message(INFO_include ${FCL_INCLUDE_DIRS})
 ## Build ##
 ###########
 catkin_package(
-   INCLUDE_DIRS 
-      include
-   CATKIN_DEPENDS 
-      roscpp rospy roslib std_msgs geometric_shapes
+   INCLUDE_DIRS include
+   LIBRARIES ros_collision_checking        
+   CATKIN_DEPENDS roscpp rospy roslib std_msgs geometric_shapes 
    DEPENDS 
       EIGEN3
 )
@@ -71,10 +70,10 @@ endif()
 
 add_definitions(${PCL_DEFINITIONS})
 
-add_library(fcl_interface
+add_library(ros_collision_checking
    src/fcl_interface.cpp
    include/${PROJECT_NAME}/fcl_interface.h
-)
+) 
 
 add_executable(testing ./src/test_file.cpp)
 add_executable(test_fcl_inter ./src/fcl_interface.cpp)
@@ -85,14 +84,14 @@ target_link_libraries(test_fcl_inter
                         ${FCL_LIBRARIES}
                         ${CCD_LIBRARIES})
                         
-add_dependencies(fcl_interface 
+add_dependencies(ros_collision_checking 
 		  ${${PROJECT_NAME}_EXPORTED_TARGETS}
 		  ${catkin_EXPORTED_TARGETS}
 		  ${FCL_LIBRARIES}
 		  ${CCD_LIBRARIES})
 
- add_dependencies(test_fcl_inter 
- 		  ${${PROJECT_NAME}_EXPORTED_TARGETS}
- 		  ${catkin_EXPORTED_TARGETS}
-		  ${FCL_LIBRARIES}
-		  ${CCD_LIBRARIES})		  
+#  add_dependencies(test_fcl_inter 
+#  		  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+#  		  ${catkin_EXPORTED_TARGETS}
+# 		  ${FCL_LIBRARIES}
+# 		  ${CCD_LIBRARIES})		  

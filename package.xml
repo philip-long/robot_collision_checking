@@ -65,6 +65,8 @@
   <build_export_depend>roslib</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
   <build_export_depend>geometric_shapes</build_export_depend>
+  <build_export_depend>libfcl-dev</build_export_depend>
+  
   <exec_depend>shape_msgs</exec_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>rospy</exec_depend>
@@ -72,7 +74,6 @@
   <exec_depend>roslib</exec_depend>
   <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>geometric_shapes</exec_depend>
-
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

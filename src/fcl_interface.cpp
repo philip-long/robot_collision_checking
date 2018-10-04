@@ -110,7 +110,7 @@ bool FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  
                         fcl_collision_world[i]->collision_object.get(),
                         dist_req,
                         dist_result );
-	
+
         for ( int j=0; j<3; j++ ) {
             wP1[i] ( j ) =dist_result.nearest_points[0][j];
             wPobjs[i] ( j ) =dist_result.nearest_points[1][j];
@@ -121,12 +121,12 @@ bool FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  
 
 
 void FCLInterface::publishPoint ( Eigen::Vector3d pose,
-                                 std::string mkr_namespace,
-                                 unsigned int id,
-                                 std::string frame,
-                                 std::vector<double> color,
-                                 std::vector<double> scale
-                               ) {
+                                  std::string mkr_namespace,
+                                  unsigned int id,
+                                  std::string frame,
+                                  std::vector<double> color,
+                                  std::vector<double> scale
+                                ) {
     visualization_msgs::Marker mkr;
     mkr.ns=mkr_namespace;
     mkr.action=visualization_msgs::Marker::ADD;
@@ -228,9 +228,41 @@ bool FCLInterface::displayObjects ( std::vector<unsigned int> object_ids ) {
                 ros::spinOnce();
             }
         }
-
     }
 }
+
+
+
+bool FCLInterface::displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::Affine3d & T,unsigned int obj_id,Eigen::Vector4d color )
+{
+    visualization_msgs::Marker mkr;
+    geometric_shapes::constructMarkerFromShape ( s1,mkr );
+    while ( mkr_pub.getNumSubscribers() <1 ) {
+        ROS_INFO_ONCE ( "Waiting until marker is displayed in RVIZ" );
+        ros::spinOnce();
+        ros::Duration ( 0.05 ).sleep();
+    }
+    mkr.action=visualization_msgs::Marker::ADD;
+    mkr.header.frame_id="world";
+    mkr.ns="Objects";
+    mkr.lifetime=ros::Duration ( 0.0 );
+    mkr.id=obj_id;  
+    mkr.color.r=color ( 0 );
+    mkr.color.g=color ( 1 );
+    mkr.color.b=color ( 2 );
+    mkr.color.a=color ( 3 );
+    Eigen::Quaterniond q ( T.linear() );
+    mkr.pose.position.x=T ( 0,3 );
+    mkr.pose.position.y=T ( 1,3 );
+    mkr.pose.position.z=T ( 2,3 );
+    mkr.pose.orientation.w=q.w();
+    mkr.pose.orientation.x=q.x();
+    mkr.pose.orientation.y=q.y();
+    mkr.pose.orientation.z=q.z();
+    mkr_pub.publish ( mkr );
+    ros::spinOnce();
+}
+
 bool FCLInterface::displayObjects() {
     visualization_msgs::Marker mkr;
     for ( unsigned int i=0; i<fcl_collision_world.size(); i++ ) {
@@ -357,9 +389,9 @@ void FCLInterface::transform2fcl ( const Eigen::Affine3d& b, fcl::Transform3d& f
 
 
 double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s1,
-        const  Eigen::Affine3d  & wT1,
-        const shape_msgs::SolidPrimitive  &  s2,
-        const Eigen::Affine3d  & wT2
+       const  Eigen::Affine3d  & wT1,
+       const shape_msgs::SolidPrimitive  &  s2,
+       const Eigen::Affine3d  & wT2
                                           ) {
     fcl::Transform3d wTf1,wTf2;
     transform2fcl ( wT1,wTf1 );
@@ -492,14 +524,16 @@ int main ( int argc, char **argv ) {
     Eigen::Vector3d e_wps1 ( 0.0,0.0,0.0 ),e_wps2 ( -1.3,2.0,0.3 ),e_wps3 ( 2.0,0.5,0.0 ),e_wps4 ( 3.0,0.0,-0.25 ),e_wps5 ( 2.21,-1.23,0.21 );
     Eigen::Matrix3d e_wRs1,e_wRs2,e_wRs3,e_wRs4,e_wRs5;
     Eigen::Affine3d e_wTs1,e_wTs2,e_wTs3,e_wTs4,e_wTs5;//(wRs1,wps1);
-    
+
     e_wRs1.setIdentity();
     e_wRs2.setIdentity();
     e_wRs3.setIdentity();
     e_wRs4.setIdentity();
     e_wRs5.setIdentity();
-    Eigen::Quaterniond q(0.5,0.5,0.23,0.43);q.normalize();
-    Eigen::Quaterniond q2(-0.5,0.5,-1.23,0.43);q2.normalize();
+    Eigen::Quaterniond q ( 0.5,0.5,0.23,0.43 );
+    q.normalize();
+    Eigen::Quaterniond q2 ( -0.5,0.5,-1.23,0.43 );
+    q2.normalize();
     e_wTs1.linear() =e_wRs1;
     e_wTs1.translation() =e_wps1;
     e_wTs2.linear() =e_wRs2;
@@ -648,11 +682,11 @@ int main ( int argc, char **argv ) {
         std::cout<<"Sphere distance  "<<obj_distances[i]<<std::endl;
         std::cout<<" Closest Points p1w = ["<<p1w[i] ( 0 ) <<", "<<p1w[i] ( 1 ) <<", "<<p1w[i] ( 2 ) <<"]"<<std::endl;
         std::cout<<"                p2w = ["<<p2w[i] ( 0 ) <<", "<<p2w[i] ( 1 ) <<", "<<p2w[i] ( 2 ) <<"]"<<std::endl;
-	test_node.publishPoint(p1w[i],"closest_point1",i,"world",{1.0,0.0,1.0},{0.1,0.1,0.1});
-	test_node.publishPoint(p2w[i],"closest_point2",i,"world",{1.0,0.0,0.0},{0.1,0.1,0.1});
+        test_node.publishPoint ( p1w[i],"closest_point1",i,"world", {1.0,0.0,1.0}, {0.1,0.1,0.1} );
+        test_node.publishPoint ( p2w[i],"closest_point2",i,"world", {1.0,0.0,0.0}, {0.1,0.1,0.1} );
     }
 
-    test_node.publishPoint(e_wTs1.translation(),"object",100,"world",{1.0,0.0,0.0},{0.6,0.6,0.6});
+    test_node.publishPoint ( e_wTs1.translation(),"object",100,"world", {1.0,0.0,0.0}, {0.6,0.6,0.6} );
     return 1;
 }
 

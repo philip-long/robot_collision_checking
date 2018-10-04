@@ -55,6 +55,9 @@ public:
     bool addCollisionObject ( const shape_msgs::Mesh  & s1 ,
                               const  Eigen::Affine3d  & wT1,unsigned int object_id );
     bool removeCollisionObject ( unsigned int object_id );
+
+    bool displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::Affine3d & T,
+                         unsigned int obj_id,Eigen::Vector4d color );
     bool displayObjects ( std::vector<unsigned int> object_ids );
     bool displayObjects();
     void publishPoint ( Eigen::Vector3d pose,
