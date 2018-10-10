@@ -91,10 +91,6 @@ bool FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  
 
 
     FCLCollisionObjectPtr o1 ( new fcl::CollisionObjectd ( cg,wTf1 ) );
-
-
-
-    std::cout<<"Size of world"<<fcl_collision_world.size() <<std::endl;
     for ( unsigned int i=0; i<fcl_collision_world.size(); i++ ) {
         fcl::DistanceRequestd dist_req;
         dist_req.enable_nearest_points=true;
@@ -148,7 +144,7 @@ void FCLInterface::publishPoint ( Eigen::Vector3d pose,
     mkr.scale.x=scale[0];
     mkr.scale.y=scale[1];
     mkr.scale.z=scale[2];
-    while ( mkr_pub.getNumSubscribers() <1 ) {
+    while ( mkr_pub.getNumSubscribers() <1 && ros::ok()) {
         ROS_INFO ( "Waiting for subs" );
         ros::spinOnce();
     }
@@ -224,6 +220,7 @@ bool FCLInterface::displayObjects ( std::vector<unsigned int> object_ids ) {
                             fcl_collision_world[i]->object_type==shape_msgs::SolidPrimitive::CYLINDER ) {
                     geometric_shapes::constructMarkerFromShape ( fcl_collision_world[i]->solid,mkr );
                 }
+                mkr.ns="collisionObjects";
                 mkr_pub.publish ( mkr );
                 ros::spinOnce();
             }
@@ -279,8 +276,6 @@ bool FCLInterface::displayObjects() {
         } else if ( fcl_collision_world[i]->object_type==shape_msgs::SolidPrimitive::SPHERE ||
                     fcl_collision_world[i]->object_type==shape_msgs::SolidPrimitive::BOX ||
                     fcl_collision_world[i]->object_type==shape_msgs::SolidPrimitive::CYLINDER ) {
-            std::cout<<fcl_collision_world[i]->solid<<std::endl;
-
             geometric_shapes::constructMarkerFromShape ( fcl_collision_world[i]->solid,mkr );
         }
 
@@ -293,7 +288,7 @@ bool FCLInterface::displayObjects() {
         }
         mkr.action=visualization_msgs::Marker::ADD;
         mkr.header.frame_id="world";
-        mkr.ns="Objects";
+        mkr.ns="CollisionObjects";
         mkr.lifetime=ros::Duration ( 0.0 );
         mkr.color.a=0.5;
 
@@ -425,8 +420,6 @@ double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s
     fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTf1 );
     fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTf2 );
 
-    std::cout<<"cg_1->computeVolume() "<<cg_1->computeVolume() <<std::endl;
-    std::cout<<"cg_2->computeVolume() "<<cg_2->computeVolume() <<std::endl;
     fcl::DistanceRequestd dist_req;
     dist_req.enable_nearest_points=true;
     dist_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;

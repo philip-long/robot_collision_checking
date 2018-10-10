@@ -17,10 +17,18 @@ find_package(catkin REQUIRED COMPONENTS
   geometric_shapes
   )
 
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
+
+set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
+
 find_package(CCD REQUIRED)
 find_package(Eigen3 REQUIRED)
+
+if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/FindFCL.cmake")
 find_package(FCL REQUIRED)
+else()
+  set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/cmake/")
+  find_package(FCL REQUIRED)
+endif()
 
 find_library(EIGEN_CDDLIB_LIB eigen-cddlib)
 
