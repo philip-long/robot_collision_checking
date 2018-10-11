@@ -22,6 +22,7 @@
 typedef std::shared_ptr<fcl::CollisionObjectd> FCLCollisionObjectPtr;
 typedef std::shared_ptr<fcl::CollisionGeometryd> FCLCollisionGeometryPtr;
 
+
 int PLANE=10;
 struct FCLInterfaceCollisionObject {
     FCLCollisionObjectPtr collision_object;
@@ -35,6 +36,16 @@ struct FCLInterfaceCollisionObject {
     };
 };
 
+// FCL Object is simply a container for the object information
+struct FCLObject {
+    FCLObject ( const shape_msgs::SolidPrimitive & shape,
+                const Eigen::Affine3d  & transform
+              ) : object_shape ( shape ),object_transform ( transform ) {};
+    shape_msgs::SolidPrimitive  object_shape;
+    Eigen::Affine3d  object_transform;
+};
+
+typedef std::vector<FCLObject> FCLObjectSet;
 
 class FCLInterface
 {
@@ -92,6 +103,9 @@ public:
                                   );
 
 
+
+
+
     // Static functions
     static  FCLCollisionGeometryPtr createCollisionGeometry ( const shape_msgs::SolidPrimitive & s1 );
     static  FCLCollisionGeometryPtr createCollisionGeometry ( const shape_msgs::Plane  & s1 );
@@ -112,6 +126,22 @@ public:
                                          Eigen::Vector3d & wP1,
                                          Eigen::Vector3d & wP2
                                        );
+    // Returns the distance between two solid primitives
+    // Also returns the position w.r.t to world frame of the closest points
+    static double checkDistanceObjects ( const  FCLObject & object1,
+                                         const  FCLObject & object2,
+                                         Eigen::Vector3d & closest_pt_object1,
+                                         Eigen::Vector3d & closest_pt_object2
+                                       );
+
+    //FCLObjectSet
+    static   bool checkDistanceObjectWorld ( FCLObject link,
+            FCLObjectSet object_world,
+            std::vector<double> & objs_distance,
+            std::vector<Eigen::Vector3d> & closest_pt_robot,
+            std::vector<Eigen::Vector3d> & closest_pt_objects
+                                           );
+
     // Returns true if two solid primitives are in collision
     static bool checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s1,
                                         const  Eigen::Affine3d  & wT1,
@@ -119,6 +149,9 @@ public:
                                         const Eigen::Affine3d  & wT2
                                       );
 
+    static bool checkCollisionObjects ( const FCLObject & object1,
+                                        const FCLObject & object2
+                                      );
 
     static void convertGeometryPoseEigenTransform ( const geometry_msgs::Pose & geo_pose,
             Eigen::Affine3d& wTt );

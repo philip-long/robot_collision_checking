@@ -144,7 +144,7 @@ void FCLInterface::publishPoint ( Eigen::Vector3d pose,
     mkr.scale.x=scale[0];
     mkr.scale.y=scale[1];
     mkr.scale.z=scale[2];
-    while ( mkr_pub.getNumSubscribers() <1 && ros::ok()) {
+    while ( mkr_pub.getNumSubscribers() <1 && ros::ok() ) {
         ROS_INFO ( "Waiting for subs" );
         ros::spinOnce();
     }
@@ -230,8 +230,7 @@ bool FCLInterface::displayObjects ( std::vector<unsigned int> object_ids ) {
 
 
 
-bool FCLInterface::displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::Affine3d & T,unsigned int obj_id,Eigen::Vector4d color )
-{
+bool FCLInterface::displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::Affine3d & T,unsigned int obj_id,Eigen::Vector4d color ) {
     visualization_msgs::Marker mkr;
     geometric_shapes::constructMarkerFromShape ( s1,mkr );
     while ( mkr_pub.getNumSubscribers() <1 ) {
@@ -243,7 +242,7 @@ bool FCLInterface::displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::A
     mkr.header.frame_id="world";
     mkr.ns="Objects";
     mkr.lifetime=ros::Duration ( 0.0 );
-    mkr.id=obj_id;  
+    mkr.id=obj_id;
     mkr.color.r=color ( 0 );
     mkr.color.g=color ( 1 );
     mkr.color.b=color ( 2 );
@@ -384,9 +383,9 @@ void FCLInterface::transform2fcl ( const Eigen::Affine3d& b, fcl::Transform3d& f
 
 
 double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s1,
-       const  Eigen::Affine3d  & wT1,
-       const shape_msgs::SolidPrimitive  &  s2,
-       const Eigen::Affine3d  & wT2
+        const  Eigen::Affine3d  & wT1,
+        const shape_msgs::SolidPrimitive  &  s2,
+        const Eigen::Affine3d  & wT2
                                           ) {
     fcl::Transform3d wTf1,wTf2;
     transform2fcl ( wT1,wTf1 );
@@ -437,6 +436,47 @@ double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s
     return dist_result.min_distance;
 }
 
+bool FCLInterface::checkDistanceObjectWorld ( FCLObject link,
+                                FCLObjectSet object_world,
+                                std::vector<double> & objs_distance,
+                                std::vector<Eigen::Vector3d> & closest_pt_robot,
+                                std::vector<Eigen::Vector3d> & closest_pt_objects
+                              ) {
+    closest_pt_robot.clear();
+    closest_pt_robot.resize ( object_world.size() );
+    closest_pt_objects.clear();
+    closest_pt_objects.resize ( object_world.size() );
+    objs_distance.clear();
+    objs_distance.resize ( object_world.size() );
+
+
+    for ( unsigned int i=0; i<object_world.size(); i++ ) {
+        checkDistanceObjects ( link.object_shape,
+                               link.object_transform,
+                               object_world[i].object_shape,
+                               object_world[i].object_transform,
+                               closest_pt_robot[i],
+                               closest_pt_objects[i] );
+    }
+
+}
+
+double FCLInterface::checkDistanceObjects ( const  FCLObject & object1,
+        const  FCLObject & object2,
+        Eigen::Vector3d & closest_pt_object1,
+        Eigen::Vector3d & closest_pt_object2
+                                          ) {
+    checkDistanceObjects ( object1.object_shape,
+                           object1.object_transform,
+                           object2.object_shape,
+                           object2.object_transform,
+                           closest_pt_object1,
+                           closest_pt_object2 );
+}
+
+
+
+
 
 bool FCLInterface::checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s1,
         const  Eigen::Affine3d  & wT1,
@@ -456,6 +496,15 @@ bool FCLInterface::checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s
     return col_result.isCollision();
 }
 
+bool FCLInterface::checkCollisionObjects ( const FCLObject & object1,
+                             const FCLObject & object2
+                           ) {
+    return checkCollisionObjects ( object1.object_shape,
+                                   object1.object_transform,
+                                   object2.object_shape,
+                                   object2.object_transform
+                                 );
+}
 
 
 void FCLInterface::convertGeometryPoseEigenTransform ( const geometry_msgs::Pose & geo_pose,
