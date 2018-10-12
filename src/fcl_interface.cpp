@@ -437,11 +437,11 @@ double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s
 }
 
 bool FCLInterface::checkDistanceObjectWorld ( FCLObject link,
-                                FCLObjectSet object_world,
-                                std::vector<double> & objs_distance,
-                                std::vector<Eigen::Vector3d> & closest_pt_robot,
-                                std::vector<Eigen::Vector3d> & closest_pt_objects
-                              ) {
+        FCLObjectSet object_world,
+        std::vector<double> & objs_distance,
+        std::vector<Eigen::Vector3d> & closest_pt_robot,
+        std::vector<Eigen::Vector3d> & closest_pt_objects
+                                            ) {
     closest_pt_robot.clear();
     closest_pt_robot.resize ( object_world.size() );
     closest_pt_objects.clear();
@@ -460,6 +460,36 @@ bool FCLInterface::checkDistanceObjectWorld ( FCLObject link,
     }
 
 }
+
+
+
+bool FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  & shape,
+        const  Eigen::Affine3d  & transform,
+        FCLObjectSet object_world,
+        std::vector<double> & objs_distance,
+        std::vector<Eigen::Vector3d> & closest_pt_robot,
+        std::vector<Eigen::Vector3d> & closest_pt_objects
+                                            ) {
+    closest_pt_robot.clear();
+    closest_pt_robot.resize ( object_world.size() );
+    closest_pt_objects.clear();
+    closest_pt_objects.resize ( object_world.size() );
+    objs_distance.clear();
+    objs_distance.resize ( object_world.size() );
+
+
+    for ( unsigned int i=0; i<object_world.size(); i++ ) {
+        checkDistanceObjects ( shape,
+                               transform,
+                               object_world[i].object_shape,
+                               object_world[i].object_transform,
+                               closest_pt_robot[i],
+                               closest_pt_objects[i] );
+    }
+
+}
+
+
 
 double FCLInterface::checkDistanceObjects ( const  FCLObject & object1,
         const  FCLObject & object2,
@@ -497,8 +527,8 @@ bool FCLInterface::checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s
 }
 
 bool FCLInterface::checkCollisionObjects ( const FCLObject & object1,
-                             const FCLObject & object2
-                           ) {
+        const FCLObject & object2
+                                         ) {
     return checkCollisionObjects ( object1.object_shape,
                                    object1.object_transform,
                                    object2.object_shape,

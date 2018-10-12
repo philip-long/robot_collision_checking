@@ -141,6 +141,14 @@ public:
             std::vector<Eigen::Vector3d> & closest_pt_robot,
             std::vector<Eigen::Vector3d> & closest_pt_objects
                                            );
+    
+        static   bool checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
+                                        const  Eigen::Affine3d  & wT1,
+            FCLObjectSet object_world,
+            std::vector<double> & objs_distance,
+            std::vector<Eigen::Vector3d> & closest_pt_robot,
+            std::vector<Eigen::Vector3d> & closest_pt_objects
+                                           );
 
     // Returns true if two solid primitives are in collision
     static bool checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s1,
