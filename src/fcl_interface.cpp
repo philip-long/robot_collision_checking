@@ -205,30 +205,6 @@ bool FCLInterface::removeCollisionObject ( unsigned int object_id ) {
     }
     return false;
 }
-bool FCLInterface::displayObjects ( std::vector<unsigned int> object_ids ) {
-    for ( unsigned int j=0; j<object_ids.size(); j++ ) {
-        for ( unsigned int i=0; i<fcl_collision_world.size(); i++ ) {
-            if ( object_ids[j]==fcl_collision_world[i]->collision_id ) {
-                visualization_msgs::Marker mkr;
-                mkr.id=fcl_collision_world[i]->collision_id;
-                if ( fcl_collision_world[i]->object_type==visualization_msgs::Marker::TRIANGLE_LIST ) {
-                    geometric_shapes::constructMarkerFromShape ( fcl_collision_world[i]->mesh,mkr );
-                } else if ( fcl_collision_world[i]->object_type==PLANE ) {
-
-                } else if ( fcl_collision_world[i]->object_type==shape_msgs::SolidPrimitive::SPHERE ||
-                            fcl_collision_world[i]->object_type==shape_msgs::SolidPrimitive::BOX ||
-                            fcl_collision_world[i]->object_type==shape_msgs::SolidPrimitive::CYLINDER ) {
-                    geometric_shapes::constructMarkerFromShape ( fcl_collision_world[i]->solid,mkr );
-                }
-                mkr.ns="collisionObjects";
-                mkr_pub.publish ( mkr );
-                ros::spinOnce();
-            }
-        }
-    }
-}
-
-
 
 bool FCLInterface::displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::Affine3d & T,unsigned int obj_id,Eigen::Vector4d color ) {
     visualization_msgs::Marker mkr;
@@ -436,7 +412,7 @@ double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s
     return dist_result.min_distance;
 }
 
-bool FCLInterface::checkDistanceObjectWorld ( FCLObject link,
+double FCLInterface::checkDistanceObjectWorld ( FCLObject link,
         FCLObjectSet object_world,
         std::vector<double> & objs_distance,
         std::vector<Eigen::Vector3d> & closest_pt_robot,
@@ -451,19 +427,19 @@ bool FCLInterface::checkDistanceObjectWorld ( FCLObject link,
 
 
     for ( unsigned int i=0; i<object_world.size(); i++ ) {
-        checkDistanceObjects ( link.object_shape,
-                               link.object_transform,
-                               object_world[i].object_shape,
-                               object_world[i].object_transform,
-                               closest_pt_robot[i],
-                               closest_pt_objects[i] );
+        objs_distance[i]=checkDistanceObjects ( link.object_shape,
+                                                link.object_transform,
+                                                object_world[i].object_shape,
+                                                object_world[i].object_transform,
+                                                closest_pt_robot[i],
+                                                closest_pt_objects[i] );
     }
 
 }
 
 
 
-bool FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  & shape,
+double FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  & shape,
         const  Eigen::Affine3d  & transform,
         FCLObjectSet object_world,
         std::vector<double> & objs_distance,
@@ -479,12 +455,12 @@ bool FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  
 
 
     for ( unsigned int i=0; i<object_world.size(); i++ ) {
-        checkDistanceObjects ( shape,
-                               transform,
-                               object_world[i].object_shape,
-                               object_world[i].object_transform,
-                               closest_pt_robot[i],
-                               closest_pt_objects[i] );
+        objs_distance[i]=checkDistanceObjects ( shape,
+                                                transform,
+                                                object_world[i].object_shape,
+                                                object_world[i].object_transform,
+                                                closest_pt_robot[i],
+                                                closest_pt_objects[i] );
     }
 
 }
@@ -496,12 +472,14 @@ double FCLInterface::checkDistanceObjects ( const  FCLObject & object1,
         Eigen::Vector3d & closest_pt_object1,
         Eigen::Vector3d & closest_pt_object2
                                           ) {
-    checkDistanceObjects ( object1.object_shape,
+  
+  double obj_dist=checkDistanceObjects ( object1.object_shape,
                            object1.object_transform,
                            object2.object_shape,
                            object2.object_transform,
                            closest_pt_object1,
                            closest_pt_object2 );
+  return obj_dist;
 }
 
 

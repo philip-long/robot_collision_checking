@@ -41,6 +41,7 @@ struct FCLObject {
     FCLObject ( const shape_msgs::SolidPrimitive & shape,
                 const Eigen::Affine3d  & transform
               ) : object_shape ( shape ),object_transform ( transform ) {};
+    FCLObject () {};
     shape_msgs::SolidPrimitive  object_shape;
     Eigen::Affine3d  object_transform;
 };
@@ -78,6 +79,9 @@ public:
                         std::vector<double> color,
                         std::vector<double> scale
                       );
+
+    static bool displayObjects ( FCLObjectSet objects );
+
     // Check the collision between a primitives and the known world
     // Return true if in collision
     bool checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
@@ -135,20 +139,20 @@ public:
                                        );
 
     //FCLObjectSet
-    static   bool checkDistanceObjectWorld ( FCLObject link,
+    static   double checkDistanceObjectWorld ( FCLObject link,
             FCLObjectSet object_world,
             std::vector<double> & objs_distance,
             std::vector<Eigen::Vector3d> & closest_pt_robot,
             std::vector<Eigen::Vector3d> & closest_pt_objects
-                                           );
-    
-        static   bool checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
-                                        const  Eigen::Affine3d  & wT1,
+                                             );
+
+    static   double checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
+            const  Eigen::Affine3d  & wT1,
             FCLObjectSet object_world,
             std::vector<double> & objs_distance,
             std::vector<Eigen::Vector3d> & closest_pt_robot,
             std::vector<Eigen::Vector3d> & closest_pt_objects
-                                           );
+                                             );
 
     // Returns true if two solid primitives are in collision
     static bool checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s1,
