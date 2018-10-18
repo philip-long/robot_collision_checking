@@ -60,6 +60,10 @@ private:
 public:
     FCLInterface ( ros::NodeHandle nh );
     ~FCLInterface();
+    
+    bool addCollisionObject ( FCLObjectSet & objects);
+    bool addCollisionObject ( FCLObject & object,
+                                        unsigned int object_id );
     bool addCollisionObject ( const shape_msgs::SolidPrimitive & s1,
                               const  Eigen::Affine3d  & wT1,unsigned int object_id );
     bool addCollisionObject ( const shape_msgs::Plane  & s1,

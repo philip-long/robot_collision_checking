@@ -152,6 +152,25 @@ void FCLInterface::publishPoint ( Eigen::Vector3d pose,
 
 }
 
+bool FCLInterface::addCollisionObject ( FCLObjectSet & objects)
+{
+  unsigned int id(0);
+  for(auto obj : objects) 
+  {
+    addCollisionObject(obj,id); id++;
+  }
+  return true;
+  
+}
+
+bool FCLInterface::addCollisionObject ( FCLObject & object,
+                                        unsigned int object_id ) {
+    addCollisionObject ( object.object_shape,object.object_transform,object_id );
+    return true;
+}
+
+
+
 bool FCLInterface::addCollisionObject ( const shape_msgs::SolidPrimitive & s1,
                                         const  Eigen::Affine3d  & wT1,
                                         unsigned int object_id ) {
@@ -417,7 +436,7 @@ double FCLInterface::checkDistanceObjectWorld ( FCLObject link,
         std::vector<double> & objs_distance,
         std::vector<Eigen::Vector3d> & closest_pt_robot,
         std::vector<Eigen::Vector3d> & closest_pt_objects
-                                            ) {
+                                              ) {
     closest_pt_robot.clear();
     closest_pt_robot.resize ( object_world.size() );
     closest_pt_objects.clear();
@@ -445,7 +464,7 @@ double FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive
         std::vector<double> & objs_distance,
         std::vector<Eigen::Vector3d> & closest_pt_robot,
         std::vector<Eigen::Vector3d> & closest_pt_objects
-                                            ) {
+                                              ) {
     closest_pt_robot.clear();
     closest_pt_robot.resize ( object_world.size() );
     closest_pt_objects.clear();
@@ -472,14 +491,14 @@ double FCLInterface::checkDistanceObjects ( const  FCLObject & object1,
         Eigen::Vector3d & closest_pt_object1,
         Eigen::Vector3d & closest_pt_object2
                                           ) {
-  
-  double obj_dist=checkDistanceObjects ( object1.object_shape,
-                           object1.object_transform,
-                           object2.object_shape,
-                           object2.object_transform,
-                           closest_pt_object1,
-                           closest_pt_object2 );
-  return obj_dist;
+
+    double obj_dist=checkDistanceObjects ( object1.object_shape,
+                                           object1.object_transform,
+                                           object2.object_shape,
+                                           object2.object_transform,
+                                           closest_pt_object1,
+                                           closest_pt_object2 );
+    return obj_dist;
 }
 
 
