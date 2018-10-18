@@ -21,7 +21,7 @@ bool FCLInterface::checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive 
     FCLInterface::transform2fcl ( wT1,wTf1 );
 
 
-    FCLCollisionObjectPtr o1 ( new fcl::CollisionObjectd ( cg,wTf1 ) );
+    FCLCollisionObjectPtr o1 =std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 );
 
     fcl::CollisionRequestd col_req;
     fcl::CollisionResultd col_result;
@@ -50,7 +50,7 @@ bool FCLInterface::checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive 
     FCLInterface::transform2fcl ( wT1,wTf1 );
 
 
-    FCLCollisionObjectPtr o1 ( new fcl::CollisionObjectd ( cg,wTf1 ) );
+    FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 ) ;
 
     fcl::CollisionRequestd col_req;
     fcl::CollisionResultd col_result;
@@ -90,7 +90,7 @@ bool FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  
     FCLInterface::transform2fcl ( wT1,wTf1 );
 
 
-    FCLCollisionObjectPtr o1 ( new fcl::CollisionObjectd ( cg,wTf1 ) );
+    FCLCollisionObjectPtr o1 =std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 );
     for ( unsigned int i=0; i<fcl_collision_world.size(); i++ ) {
         fcl::DistanceRequestd dist_req;
         dist_req.enable_nearest_points=true;
@@ -152,15 +152,14 @@ void FCLInterface::publishPoint ( Eigen::Vector3d pose,
 
 }
 
-bool FCLInterface::addCollisionObject ( FCLObjectSet & objects)
-{
-  unsigned int id(0);
-  for(auto obj : objects) 
-  {
-    addCollisionObject(obj,id); id++;
-  }
-  return true;
-  
+bool FCLInterface::addCollisionObject ( FCLObjectSet & objects ) {
+    unsigned int id ( 0 );
+    for ( auto obj : objects ) {
+        addCollisionObject ( obj,id );
+        id++;
+    }
+    return true;
+
 }
 
 bool FCLInterface::addCollisionObject ( FCLObject & object,
@@ -177,7 +176,7 @@ bool FCLInterface::addCollisionObject ( const shape_msgs::SolidPrimitive & s1,
     FCLCollisionGeometryPtr cg=FCLInterface::createCollisionGeometry ( s1 );
     fcl::Transform3d wTf1;
     FCLInterface::transform2fcl ( wT1,wTf1 );
-    FCLCollisionObjectPtr o1 ( new fcl::CollisionObjectd ( cg,wTf1 ) );
+    FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 ) ;
     FCLInterfaceCollisionObject *new_col_object ( new FCLInterfaceCollisionObject() );
     new_col_object->collision_object=o1;
     new_col_object->object_type=s1.type;
@@ -191,7 +190,7 @@ bool FCLInterface::addCollisionObject ( const shape_msgs::Plane  & s1,
     FCLCollisionGeometryPtr cg=FCLInterface::createCollisionGeometry ( s1 );
     fcl::Transform3d wTf1;
     FCLInterface::transform2fcl ( wT1,wTf1 );
-    FCLCollisionObjectPtr o1 ( new fcl::CollisionObjectd ( cg,wTf1 ) );
+    FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 ) ;
     FCLInterfaceCollisionObject *new_col_object;
     new_col_object->collision_object=o1;
     new_col_object->object_type=PLANE;
@@ -206,7 +205,7 @@ bool FCLInterface::addCollisionObject ( const shape_msgs::Mesh  & s1 ,
     FCLCollisionGeometryPtr cg=FCLInterface::createCollisionGeometry ( s1 );
     fcl::Transform3d wTf1;
     FCLInterface::transform2fcl ( wT1,wTf1 );
-    FCLCollisionObjectPtr o1 ( new fcl::CollisionObjectd ( cg,wTf1 ) );
+    FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 ) ;
     FCLInterfaceCollisionObject *new_col_object;
     new_col_object->collision_object=o1;
     new_col_object->object_type=visualization_msgs::Marker::TRIANGLE_LIST;
@@ -342,33 +341,55 @@ FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry
                                ) );
 }
 
+// FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry ( const shape_msgs::SolidPrimitive & s1 ) {
+//     if ( s1.type==shape_msgs::SolidPrimitive::SPHERE ) {
+//         return  FCLCollisionGeometryPtr (
+//                     new fcl::Sphered ( s1.dimensions[shape_msgs::SolidPrimitive::SPHERE_RADIUS] ) );
+//     } else if ( s1.type==shape_msgs::SolidPrimitive::BOX ) {
+//
+//         return  FCLCollisionGeometryPtr (
+//                     new fcl::Boxd ( s1.dimensions[shape_msgs::SolidPrimitive::BOX_X],
+//                                     s1.dimensions[shape_msgs::SolidPrimitive::BOX_Y],
+//                                     s1.dimensions[shape_msgs::SolidPrimitive::BOX_Z]
+//                                   ) );
+//     } else if ( s1.type==shape_msgs::SolidPrimitive::CONE ) {
+//         return  FCLCollisionGeometryPtr (
+//                     new fcl::Coned ( s1.dimensions[shape_msgs::SolidPrimitive::CONE_RADIUS],
+//                                      s1.dimensions[shape_msgs::SolidPrimitive::CONE_HEIGHT]
+//                                    ) );
+//     } else if ( s1.type==shape_msgs::SolidPrimitive::CYLINDER ) {
+//         return  FCLCollisionGeometryPtr (
+//                     new fcl::Cylinderd ( s1.dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS],
+//                                          s1.dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT]
+//                                        ) );
+//     } else {
+//         return nullptr;
+//     }
+//
+// }
+
 FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry ( const shape_msgs::SolidPrimitive & s1 ) {
     if ( s1.type==shape_msgs::SolidPrimitive::SPHERE ) {
-        return  FCLCollisionGeometryPtr (
-                    new fcl::Sphered ( s1.dimensions[shape_msgs::SolidPrimitive::SPHERE_RADIUS] ) );
+        return std::make_shared<fcl::Sphered> ( s1.dimensions[shape_msgs::SolidPrimitive::SPHERE_RADIUS] );
     } else if ( s1.type==shape_msgs::SolidPrimitive::BOX ) {
 
-        return  FCLCollisionGeometryPtr (
-                    new fcl::Boxd ( s1.dimensions[shape_msgs::SolidPrimitive::BOX_X],
+        return  std::make_shared<fcl::Boxd> ( s1.dimensions[shape_msgs::SolidPrimitive::BOX_X],
                                     s1.dimensions[shape_msgs::SolidPrimitive::BOX_Y],
                                     s1.dimensions[shape_msgs::SolidPrimitive::BOX_Z]
-                                  ) );
+                                  );
     } else if ( s1.type==shape_msgs::SolidPrimitive::CONE ) {
-        return  FCLCollisionGeometryPtr (
-                    new fcl::Coned ( s1.dimensions[shape_msgs::SolidPrimitive::CONE_RADIUS],
+        return  std::make_shared<fcl::Coned> ( s1.dimensions[shape_msgs::SolidPrimitive::CONE_RADIUS],
                                      s1.dimensions[shape_msgs::SolidPrimitive::CONE_HEIGHT]
-                                   ) );
+                                   );
     } else if ( s1.type==shape_msgs::SolidPrimitive::CYLINDER ) {
-        return  FCLCollisionGeometryPtr (
-                    new fcl::Cylinderd ( s1.dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS],
+        return  std::make_shared<fcl::Cylinderd> ( s1.dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS],
                                          s1.dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT]
-                                       ) );
+                                       );
     } else {
         return nullptr;
     }
 
 }
-
 
 
 void FCLInterface::transform2fcl ( const Eigen::Affine3d& b, fcl::Transform3d& f ) {
@@ -387,8 +408,10 @@ double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s
     transform2fcl ( wT2,wTf2 );
     FCLCollisionGeometryPtr cg_1=createCollisionGeometry ( s1 );
     FCLCollisionGeometryPtr cg_2=createCollisionGeometry ( s2 );
-    fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTf1 );
-    fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTf2 );
+//     fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTf1 );
+//     fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTf2 );
+    FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg_1,wTf1 );
+    FCLCollisionObjectPtr o2=std::make_shared<fcl::CollisionObjectd> ( cg_2,wTf2 );
     fcl::DistanceResultd dist_result;
     fcl::DistanceRequestd dist_req;
     //dist_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
@@ -396,7 +419,12 @@ double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s
     dist_result.nearest_points[0].setZero();
     dist_result.nearest_points[1].setZero();
 
-    fcl::distance ( o1, o2, dist_req, dist_result );
+    fcl::distance ( o1.get(), o2.get(), dist_req, dist_result );
+
+//     delete o1;
+//     delete o2;
+
+
     return dist_result.min_distance;
 }
 double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s1,
@@ -411,9 +439,10 @@ double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s
     transform2fcl ( wT2,wTf2 );
     FCLCollisionGeometryPtr cg_1=createCollisionGeometry ( s1 );
     FCLCollisionGeometryPtr cg_2=createCollisionGeometry ( s2 );
-    fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTf1 );
-    fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTf2 );
-
+//     fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTf1 );
+//     fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTf2 );
+    FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg_1,wTf1 );
+    FCLCollisionObjectPtr o2=std::make_shared<fcl::CollisionObjectd> ( cg_2,wTf2 );
     fcl::DistanceRequestd dist_req;
     dist_req.enable_nearest_points=true;
     dist_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
@@ -421,13 +450,14 @@ double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s
 
     dist_result.nearest_points[0].setZero();
     dist_result.nearest_points[1].setZero();
-    fcl::distance ( o1, o2, dist_req, dist_result );
+    fcl::distance ( o1.get(), o2.get(), dist_req, dist_result );
     for ( int i=0; i<3; i++ ) {
         wP1 ( i ) =dist_result.nearest_points[0][i];
         wP2 ( i ) =dist_result.nearest_points[1][i];
     }
 
-    delete o1,o2;
+//     delete o1;
+//     delete o2;
     return dist_result.min_distance;
 }
 
@@ -515,11 +545,15 @@ bool FCLInterface::checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s
     FCLCollisionGeometryPtr cg_2=createCollisionGeometry ( s2 );
     transform2fcl ( wT1,wTf1 );
     transform2fcl ( wT2,wTf2 );
-    fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTf1 );
-    fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTf2 );
+    //fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTf1 );
+    //fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTf2 );
+        FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg_1,wTf1 );
+    FCLCollisionObjectPtr o2=std::make_shared<fcl::CollisionObjectd> ( cg_2,wTf2 );
     fcl::CollisionRequestd col_req;
     fcl::CollisionResultd col_result;
-    fcl::collide ( o1, o2, col_req, col_result );
+    fcl::collide ( o1.get(), o2.get(), col_req, col_result );
+//     delete o1;
+//     delete o2;
     return col_result.isCollision();
 }
 
@@ -623,12 +657,14 @@ int main ( int argc, char **argv ) {
     FCLInterface::transform2fcl ( e_wTs4,wTs4 );
     FCLInterface::transform2fcl ( e_wTs5,wTs5 );
 
-    std::shared_ptr<fcl::CollisionGeometryd> cg_1 ( new fcl::Sphered ( 0.3 ) );
-    std::shared_ptr<fcl::CollisionGeometryd> cg_2 ( new fcl::Sphered ( 0.75 ) );
-    std::shared_ptr<fcl::CollisionGeometryd> cg_3 ( new fcl::Boxd ( 0.2,0.2,0.2 ) );
-    std::shared_ptr<fcl::CollisionGeometryd> cg_4 ( new fcl::Cylinderd ( 0.1,1.0 ) );
-    std::shared_ptr<fcl::CollisionGeometryd> cg_5 ( new fcl::Boxd ( 0.25,0.5,0.2 ) );
-    //
+    std::shared_ptr<fcl::CollisionGeometryd> cg_1= std::make_shared< fcl::Sphered> ( 0.3 ) ;
+    std::shared_ptr<fcl::CollisionGeometryd> cg_2= std::make_shared< fcl::Sphered> ( 0.75 ) ;
+    std::shared_ptr<fcl::CollisionGeometryd> cg_3= std::make_shared< fcl::Boxd> ( 0.2,0.2,0.2 ) ;
+    std::shared_ptr<fcl::CollisionGeometryd> cg_4=  std::make_shared< fcl::Cylinderd> ( 0.1,1.0 ) ;
+    std::shared_ptr<fcl::CollisionGeometryd> cg_5=  std::make_shared< fcl::Boxd> ( 0.25,0.5,0.2 ) ;
+    std::shared_ptr<fcl::CollisionGeometryd> cg_6=std::make_shared< fcl::Sphered  > ( 0.3 );
+    //     std::shared_ptr<fcl::CollisionGeometryd> cg_5= ( new fcl::Boxd ( 0.25,0.5,0.2 ) );
+
     fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTs1 );
     fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTs2 );
 
@@ -758,27 +794,4 @@ int main ( int argc, char **argv ) {
     test_node.publishPoint ( e_wTs1.translation(),"object",100,"world", {1.0,0.0,0.0}, {0.6,0.6,0.6} );
     return 1;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
