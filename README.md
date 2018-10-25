@@ -29,6 +29,9 @@ The FindFCL.cmake should find the installed FCL (which overrides version 5.0).
 If there are errors suchs as constants not found probably it's still using the 
 older version of FCL. Lastly, none of the examples from FCL homepage will work as they now require a templating argument. 
 
+### Installation
+1. This package compiles with catkin build
+
 ### To do
 1. Add interface for mesh type objects
 2. Add interface for octree
