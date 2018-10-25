@@ -792,6 +792,24 @@ int main ( int argc, char **argv ) {
     }
 
     test_node.publishPoint ( e_wTs1.translation(),"object",100,"world", {1.0,0.0,0.0}, {0.6,0.6,0.6} );
+    
+    
+    
+    FCLObjectSet objects;objects.resize(5);
+    objects[0].object_shape=sphere1;objects[0].object_transform=e_wTs1;
+    objects[1].object_shape=sphere2;objects[1].object_transform=e_wTs2;
+    objects[2].object_shape=box1;objects[2].object_transform=e_wTs3;
+    objects[3].object_shape=cylinder1;objects[3].object_transform=e_wTs4;
+    objects[4].object_shape=box2;objects[4].object_transform=e_wTs5;
+    
+    double distance_objs;
+    distance_objs=FCLInterface::checkDistanceObjects ( objects[0],objects[1],p1,p2);
+    std::cout<<" sphere1 & sphere2  distance = "<<distance<<std::endl;
+    std::cout<<" Closest Points p1 = ["<<p1 ( 0 ) <<", "<<p1 ( 1 ) <<", "<<p1 ( 2 ) <<"]"<<std::endl;
+    std::cout<<"                p2 = ["<<p2 ( 0 ) <<", "<<p2 ( 1 ) <<", "<<p2 ( 2 ) <<"]"<<std::endl;
+    
+    
+    
     return 1;
 }
 

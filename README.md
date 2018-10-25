@@ -28,3 +28,8 @@ The binaries FCL 5.0 should be already installed on ros kinetic, but we can't us
 The FindFCL.cmake should find the installed FCL (which overrides version 5.0).
 If there are errors suchs as constants not found probably it's still using the 
 older version of FCL. Lastly, none of the examples from FCL homepage will work as they now require a templating argument. 
+
+### To do
+1. Add interface for mesh type objects
+2. Add interface for octree
+3. Add server client
