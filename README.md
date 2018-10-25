@@ -4,7 +4,7 @@ A package to access FCL through a simple ros interface (heavily inspired by move
 2. Collision checking & distance checking can be done by static functions or creating a class and maintaining a world
 
 
-This package requires 
+This package requires
 
  * fcl > 6.0 [FCL](http://www.ros.org/wiki/fcl) 
  * [libccd](https://github.com/danfis/libccd) 
