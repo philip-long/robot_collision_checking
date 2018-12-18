@@ -157,6 +157,10 @@ public:
             std::vector<Eigen::Vector3d> & closest_pt_robot,
             std::vector<Eigen::Vector3d> & closest_pt_objects
                                              );
+    
+    
+    static bool checkCollisionObjectWorld(const shape_msgs::SolidPrimitive  & shape,
+            const  Eigen::Affine3d  & transform, FCLObjectSet object_world);
 
     // Returns true if two solid primitives are in collision
     static bool checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s1,

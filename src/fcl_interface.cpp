@@ -295,6 +295,7 @@ bool FCLInterface::displayObjects() {
         mkr.pose.orientation.z=q.z();
         mkr_pub.publish ( mkr );
         ros::spinOnce();
+        ros::Duration ( 0.02 ).sleep();
     }
 }
 
@@ -374,17 +375,17 @@ FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry ( const shape_msgs
     } else if ( s1.type==shape_msgs::SolidPrimitive::BOX ) {
 
         return  std::make_shared<fcl::Boxd> ( s1.dimensions[shape_msgs::SolidPrimitive::BOX_X],
-                                    s1.dimensions[shape_msgs::SolidPrimitive::BOX_Y],
-                                    s1.dimensions[shape_msgs::SolidPrimitive::BOX_Z]
-                                  );
+                                              s1.dimensions[shape_msgs::SolidPrimitive::BOX_Y],
+                                              s1.dimensions[shape_msgs::SolidPrimitive::BOX_Z]
+                                            );
     } else if ( s1.type==shape_msgs::SolidPrimitive::CONE ) {
         return  std::make_shared<fcl::Coned> ( s1.dimensions[shape_msgs::SolidPrimitive::CONE_RADIUS],
-                                     s1.dimensions[shape_msgs::SolidPrimitive::CONE_HEIGHT]
-                                   );
+                                               s1.dimensions[shape_msgs::SolidPrimitive::CONE_HEIGHT]
+                                             );
     } else if ( s1.type==shape_msgs::SolidPrimitive::CYLINDER ) {
         return  std::make_shared<fcl::Cylinderd> ( s1.dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS],
-                                         s1.dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT]
-                                       );
+                s1.dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT]
+                                                 );
     } else {
         return nullptr;
     }
@@ -514,6 +515,23 @@ double FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive
 
 }
 
+bool FCLInterface::checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive  & shape,
+        const  Eigen::Affine3d  & transform,
+        FCLObjectSet object_world ) {
+
+    for ( unsigned int i=0; i<object_world.size(); i++ ) {
+        if ( checkCollisionObjects ( shape,
+                                     transform,
+                                     object_world[i].object_shape,
+                                     object_world[i].object_transform )
+           ) {
+            return true; // In collision with ith object
+        }
+    }
+    return false; // is not in collision with any object
+}
+
+
 
 
 double FCLInterface::checkDistanceObjects ( const  FCLObject & object1,
@@ -534,7 +552,6 @@ double FCLInterface::checkDistanceObjects ( const  FCLObject & object1,
 
 
 
-
 bool FCLInterface::checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s1,
         const  Eigen::Affine3d  & wT1,
         const shape_msgs::SolidPrimitive  & s2,
@@ -547,7 +564,7 @@ bool FCLInterface::checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s
     transform2fcl ( wT2,wTf2 );
     //fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTf1 );
     //fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTf2 );
-        FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg_1,wTf1 );
+    FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg_1,wTf1 );
     FCLCollisionObjectPtr o2=std::make_shared<fcl::CollisionObjectd> ( cg_2,wTf2 );
     fcl::CollisionRequestd col_req;
     fcl::CollisionResultd col_result;
@@ -792,24 +809,30 @@ int main ( int argc, char **argv ) {
     }
 
     test_node.publishPoint ( e_wTs1.translation(),"object",100,"world", {1.0,0.0,0.0}, {0.6,0.6,0.6} );
-    
-    
-    
-    FCLObjectSet objects;objects.resize(5);
-    objects[0].object_shape=sphere1;objects[0].object_transform=e_wTs1;
-    objects[1].object_shape=sphere2;objects[1].object_transform=e_wTs2;
-    objects[2].object_shape=box1;objects[2].object_transform=e_wTs3;
-    objects[3].object_shape=cylinder1;objects[3].object_transform=e_wTs4;
-    objects[4].object_shape=box2;objects[4].object_transform=e_wTs5;
-    
+
+
+
+    FCLObjectSet objects;
+    objects.resize ( 5 );
+    objects[0].object_shape=sphere1;
+    objects[0].object_transform=e_wTs1;
+    objects[1].object_shape=sphere2;
+    objects[1].object_transform=e_wTs2;
+    objects[2].object_shape=box1;
+    objects[2].object_transform=e_wTs3;
+    objects[3].object_shape=cylinder1;
+    objects[3].object_transform=e_wTs4;
+    objects[4].object_shape=box2;
+    objects[4].object_transform=e_wTs5;
+
     double distance_objs;
-    distance_objs=FCLInterface::checkDistanceObjects ( objects[0],objects[1],p1,p2);
+    distance_objs=FCLInterface::checkDistanceObjects ( objects[0],objects[1],p1,p2 );
     std::cout<<" sphere1 & sphere2  distance = "<<distance<<std::endl;
     std::cout<<" Closest Points p1 = ["<<p1 ( 0 ) <<", "<<p1 ( 1 ) <<", "<<p1 ( 2 ) <<"]"<<std::endl;
     std::cout<<"                p2 = ["<<p2 ( 0 ) <<", "<<p2 ( 1 ) <<", "<<p2 ( 2 ) <<"]"<<std::endl;
-    
-    
-    
+
+
+
     return 1;
 }
 
