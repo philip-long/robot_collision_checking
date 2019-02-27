@@ -177,6 +177,7 @@ bool FCLInterface::addCollisionObject ( const shape_msgs::SolidPrimitive & s1,
     fcl::Transform3d wTf1;
     FCLInterface::transform2fcl ( wT1,wTf1 );
     FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 ) ;
+    std::cout<<"Solid count"<<o1.use_count()<<std::endl;
     FCLInterfaceCollisionObject *new_col_object ( new FCLInterfaceCollisionObject() );
     new_col_object->collision_object=o1;
     new_col_object->object_type=s1.type;
@@ -191,7 +192,9 @@ bool FCLInterface::addCollisionObject ( const shape_msgs::Plane  & s1,
     fcl::Transform3d wTf1;
     FCLInterface::transform2fcl ( wT1,wTf1 );
     FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 ) ;
-    FCLInterfaceCollisionObject *new_col_object;
+    
+    
+     FCLInterfaceCollisionObject *new_col_object ( new FCLInterfaceCollisionObject() );
     new_col_object->collision_object=o1;
     new_col_object->object_type=PLANE;
     new_col_object->collision_id=object_id;
@@ -201,18 +204,21 @@ bool FCLInterface::addCollisionObject ( const shape_msgs::Plane  & s1,
 }
 bool FCLInterface::addCollisionObject ( const shape_msgs::Mesh  & s1 ,
                                         const  Eigen::Affine3d  & wT1,unsigned int object_id ) {
-
+    
     FCLCollisionGeometryPtr cg=FCLInterface::createCollisionGeometry ( s1 );
+  
     fcl::Transform3d wTf1;
-    FCLInterface::transform2fcl ( wT1,wTf1 );
+    FCLInterface::transform2fcl ( wT1,wTf1 );    
+    
     FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 ) ;
-    FCLInterfaceCollisionObject *new_col_object;
+   std::cout<<"Mesh count"<<o1.use_count()<<std::endl;
+   
+     FCLInterfaceCollisionObject *new_col_object ( new FCLInterfaceCollisionObject() );
     new_col_object->collision_object=o1;
-    new_col_object->object_type=visualization_msgs::Marker::TRIANGLE_LIST;
-    new_col_object->collision_id=object_id;
-    new_col_object->mesh=s1;
-    fcl_collision_world.push_back ( std::unique_ptr<FCLInterfaceCollisionObject> ( new_col_object ) );
-
+     new_col_object->object_type=visualization_msgs::Marker::TRIANGLE_LIST;
+     new_col_object->collision_id=object_id;
+     new_col_object->mesh=s1;
+     fcl_collision_world.push_back ( std::unique_ptr<FCLInterfaceCollisionObject> ( new_col_object ) );
 }
 bool FCLInterface::removeCollisionObject ( unsigned int object_id ) {
     for ( unsigned int i=0; i<fcl_collision_world.size(); i++ ) {
@@ -682,10 +688,9 @@ int main ( int argc, char **argv ) {
     std::shared_ptr<fcl::CollisionGeometryd> cg_6=std::make_shared< fcl::Sphered  > ( 0.3 );
     //     std::shared_ptr<fcl::CollisionGeometryd> cg_5= ( new fcl::Boxd ( 0.25,0.5,0.2 ) );
 
+
     fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTs1 );
     fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTs2 );
-
-
 
 
     fcl::CollisionRequestd request;
@@ -758,7 +763,6 @@ int main ( int argc, char **argv ) {
     cylinder1.dimensions[shape_msgs::SolidPrimitive::CYLINDER_HEIGHT]=1.0;
     cylinder1.dimensions[shape_msgs::SolidPrimitive::CYLINDER_RADIUS]=0.1;
     cylinder1.type=shape_msgs::SolidPrimitive::CYLINDER;
-
 
 
 
