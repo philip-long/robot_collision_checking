@@ -37,9 +37,8 @@ older version of FCL. Lastly, none of the examples from FCL homepage will work a
 1. This package compiles with catkin build
 
 ### To do
-1. Add interface for mesh type objects
-2. Add interface for octree
-3. Add server client
+1. Add interface for octree/point clouds
+2. Add server client
 
 ### Example using ros shape_msgs
 ```
