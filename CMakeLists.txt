@@ -45,7 +45,6 @@ catkin_package(
    DEPENDS
   EIGEN3
   CCD
-  Eigen3
   FCL
 )
 

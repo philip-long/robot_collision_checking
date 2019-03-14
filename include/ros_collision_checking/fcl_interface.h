@@ -1,18 +1,24 @@
+///  @file fcl_interface.h
+/// \class FCLInterface
+/// \brief A simple ros interface for fcl
+///
+/// A simple class that allows collision checking using FCL in ros. Solid primitives
+/// and mesh objects are supported. Collision worlds can be constructed, can return
+/// collission as a boolean but also minimum distance and points of minimum distance
+/// on both objects.
+///
+///
+/// \author Philip Long <philip.long01@gmail.com>, RiVER Lab Northeastern University
+/// \date Mar, 2019
+
+
 #include <ros/ros.h>
-#include <ros/package.h>
-#include <Eigen/Core>
-#include <Eigen/Eigen>/*
-#include <fcl/geometry/bvh/BVH_model.h>
-#include <fcl/geometry/geometric_shape_to_BVH_model.h>
-#include <fcl/geometry/octree/octree.h>
-#include <fcl/narrowphase/collision.h>
-#include <fcl/narrowphase/distance.h>*/
+#include <Eigen/Eigen>
 #include <fcl/fcl.h>
 #include <shape_msgs/SolidPrimitive.h>
 #include <shape_msgs/Plane.h>
 #include <shape_msgs/Mesh.h>
 #include <geometry_msgs/Pose.h>
-#include <visualization_msgs/Marker.h>
 #include <geometric_shapes/shape_to_marker.h>
 
 #ifndef FCL_INTERFACE_HPP
@@ -24,6 +30,7 @@ typedef std::shared_ptr<fcl::CollisionGeometryd> FCLCollisionGeometryPtr;
 
 
 int PLANE=10;
+/// A collision object to interface with ros
 struct FCLInterfaceCollisionObject {
     FCLCollisionObjectPtr collision_object;
     unsigned int collision_id;
@@ -36,7 +43,7 @@ struct FCLInterfaceCollisionObject {
     };
 };
 
-// FCL Object is simply a container for the object information
+/// FCL Object is simply a container for the object information
 struct FCLObject {
     FCLObject ( const shape_msgs::SolidPrimitive & shape,
                 const Eigen::Affine3d  & transform
@@ -46,6 +53,7 @@ struct FCLObject {
     Eigen::Affine3d  object_transform;
 };
 
+/// Vector of FCL Objects
 typedef std::vector<FCLObject> FCLObjectSet;
 
 class FCLInterface
@@ -60,22 +68,31 @@ private:
 public:
     FCLInterface ( ros::NodeHandle nh );
     ~FCLInterface();
-    
-    bool addCollisionObject ( FCLObjectSet & objects);
+
+    /// Add a set of collision objects to the world
+    bool addCollisionObject ( FCLObjectSet & objects );
+    /// Add a FCL collision objects with a defined id to the world
     bool addCollisionObject ( FCLObject & object,
-                                        unsigned int object_id );
+                              unsigned int object_id );
+    /// Add a collision objects defined by a ROS SolidPrimitive msgs with a defined id to the world
     bool addCollisionObject ( const shape_msgs::SolidPrimitive & s1,
                               const  Eigen::Affine3d  & wT1,unsigned int object_id );
+    /// Add a collision objects defined by a ROS plane msgs with a defined id to the world (Untested)
     bool addCollisionObject ( const shape_msgs::Plane  & s1,
                               const  Eigen::Affine3d  & wT1, unsigned int object_id );
+    /// Add a collision objects defined by a ROS mesh msgs with a defined id to the world
     bool addCollisionObject ( const shape_msgs::Mesh  & s1 ,
                               const  Eigen::Affine3d  & wT1,unsigned int object_id );
+    /// Delete a collision object with object id
     bool removeCollisionObject ( unsigned int object_id );
-
+    /// Display a marker defined by its ROS msgs in rviz
     bool displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::Affine3d & T,
                          unsigned int obj_id,Eigen::Vector4d color );
+    /// Display a vector of object defined by their ids in Rviz
     bool displayObjects ( std::vector<unsigned int> object_ids );
+    /// Display all  objects defined by their ids in Rviz
     bool displayObjects();
+    /// Publish a point in RVIZ
     void publishPoint ( Eigen::Vector3d pose,
                         std::string mkr_namespace,
                         unsigned int id,
@@ -84,24 +101,24 @@ public:
                         std::vector<double> scale
                       );
 
+    /// Display an object set in RVIZ
     static bool displayObjects ( FCLObjectSet objects );
 
-    // Check the collision between a primitives and the known world
-    // Return true if in collision
+    /// Check the collision between a primitives and the known world. Return true if in collision
     bool checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
                                      const  Eigen::Affine3d  & wT1
                                    );
-    // Check the collision between a primitives and the known world
-    // Return true if in collision, also returns a list of colliding objects
+    // Check the collision between a primitives and the known world. Return true if in collision, also returns a list of colliding objects
     bool checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
                                      const  Eigen::Affine3d  & wT1,
                                      std::vector<unsigned int> & id_collision_objects
                                    );
-    // Gets the distance from the object( shape s1 location wT1) and the collision world
-    // Returns:
-    //    1. objs_distance a vector of distances (len = nbr of objects)
-    //    2. wP1 a vector of points (len = nbr of objects) closest pt on primitives to objects
-    //    3. wPobjs a vector of points (len = nbr of objects) closest pt on objects to primitives
+    /** Gets the distance from the object( shape s1 location wT1) and the collision world
+    * Returns:
+    *    1. objs_distance a vector of distances (len = nbr of objects)
+    *    2. id_collision_objects an ordered vector of collision object ids
+    *    3. wP1 a vector of points (len = nbr of objects) closest pt on primitives to objects
+    *    4. wPobjs a vector of points (len = nbr of objects) closest pt on objects to primitives*/
     bool checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
                                     const  Eigen::Affine3d  & wT1,
                                     std::vector<int> & id_collision_objects,
@@ -111,12 +128,11 @@ public:
                                   );
 
 
-
-
-
-    // Static functions
+    /// Create a collision fcl geometry from a ros msgs
     static  FCLCollisionGeometryPtr createCollisionGeometry ( const shape_msgs::SolidPrimitive & s1 );
+    /// Create a collision fcl geometry from a ros msgs
     static  FCLCollisionGeometryPtr createCollisionGeometry ( const shape_msgs::Plane  & s1 );
+    /// Create a collision fcl geometry from a ros msgs
     static  FCLCollisionGeometryPtr createCollisionGeometry ( const shape_msgs::Mesh  & s1 );
 
     // Returns the distance between two solid primitives
@@ -125,8 +141,8 @@ public:
                                          const shape_msgs::SolidPrimitive  &  s2,
                                          const Eigen::Affine3d  & wT2
                                        );
-    // Returns the distance between two solid primitives
-    // Also returns the position w.r.t to world frame of the closest points
+    /** Returns the distance between two solid primitives
+    * Also returns the position w.r.t to world frame of the closest points */
     static double checkDistanceObjects ( const shape_msgs::SolidPrimitive & s1,
                                          const  Eigen::Affine3d  & wT1,
                                          const shape_msgs::SolidPrimitive  &  s2,
@@ -134,22 +150,31 @@ public:
                                          Eigen::Vector3d & wP1,
                                          Eigen::Vector3d & wP2
                                        );
-    // Returns the distance between two solid primitives
-    // Also returns the position w.r.t to world frame of the closest points
+    /** Returns the distance between two solid primitives
+    * Also returns the position w.r.t to world frame of the closest points */
     static double checkDistanceObjects ( const  FCLObject & object1,
                                          const  FCLObject & object2,
                                          Eigen::Vector3d & closest_pt_object1,
                                          Eigen::Vector3d & closest_pt_object2
                                        );
 
-    //FCLObjectSet
+    /** Gets the distance from the FCLObject and the FCLObjectSet
+    * Returns:
+    *    1. objs_distance a vector of distances (len = nbr of objects)
+    *    2. closest_pt_robot a vector of points (len = nbr of objects) closest pt on FCLObject to FCLObjectSet
+    *    3. closest_pt_objects a vector of points (len = nbr of objects) closest pt on FCLObjectSet to FCLObject */
     static   double checkDistanceObjectWorld ( FCLObject link,
             FCLObjectSet object_world,
             std::vector<double> & objs_distance,
             std::vector<Eigen::Vector3d> & closest_pt_robot,
             std::vector<Eigen::Vector3d> & closest_pt_objects
                                              );
-
+    
+    /** Gets the distance from the object( shape s1 location wT1) and the FCLObjectSet
+    * Returns:
+    *    1. objs_distance a vector of distances (len = nbr of objects)
+    *    2. closest_pt_robot a vector of points (len = nbr of objects) closest pt on FCLObject to FCLObjectSet
+    *    3. closest_pt_objects a vector of points (len = nbr of objects) closest pt on FCLObjectSet to FCLObject */
     static   double checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
             const  Eigen::Affine3d  & wT1,
             FCLObjectSet object_world,
@@ -157,18 +182,18 @@ public:
             std::vector<Eigen::Vector3d> & closest_pt_robot,
             std::vector<Eigen::Vector3d> & closest_pt_objects
                                              );
-    
-    
-    static bool checkCollisionObjectWorld(const shape_msgs::SolidPrimitive  & shape,
-            const  Eigen::Affine3d  & transform, FCLObjectSet object_world);
 
-    // Returns true if two solid primitives are in collision
+    /// Check collision between a ros shape msgs with transform and FCLObjectSet. Returns true if there is a collision
+    static bool checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive  & shape,
+                                            const  Eigen::Affine3d  & transform, FCLObjectSet object_world );
+
+    /// Returns true if two solid primitives are in collision
     static bool checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s1,
                                         const  Eigen::Affine3d  & wT1,
                                         const shape_msgs::SolidPrimitive  & s2,
                                         const Eigen::Affine3d  & wT2
                                       );
-
+    /// Returns true if two FCLObjects are in collision
     static bool checkCollisionObjects ( const FCLObject & object1,
                                         const FCLObject & object2
                                       );
@@ -183,9 +208,7 @@ public:
     static void convertEigenVectorGeometryPoint ( const  Eigen::Vector3d& wTt,
             geometry_msgs::Point& geo_pose );
 
-    // These function is taken from moveit core
+    // This function is taken from moveit core
     static void transform2fcl ( const Eigen::Affine3d& b, fcl::Transform3d& f );
-    /** \brief Construct the marker that corresponds to the shape. Return false on failure. */
-
 };
 #endif
