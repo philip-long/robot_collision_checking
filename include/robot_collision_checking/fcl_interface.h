@@ -65,6 +65,21 @@ private:
     unsigned int obj_counter;
     ros::Publisher mkr_pub; //  rviz visualization
 
+    /// Check the minimum distance between current world and ptr
+    double checkMinimumDistanceObjectWorld(FCLCollisionObjectPtr o1);
+    
+    /// Static function that checks the minimum distance between two collision objects
+    static double checkDistanceObjects ( FCLCollisionObjectPtr o1,
+        FCLCollisionObjectPtr o2,
+        Eigen::Vector3d & wP1,
+        Eigen::Vector3d & wP2 );
+    
+    /// Check the distances between object and all world objects
+    bool checkDistanceObjectWorld ( FCLCollisionObjectPtr o1,
+          std::vector<int> & id_collision_objects,
+        std::vector<double> & objs_distance,
+        std::vector<Eigen::Vector3d> & wP1,
+        std::vector<Eigen::Vector3d> & wPobjs);
 public:
     FCLInterface ( ros::NodeHandle nh );
     ~FCLInterface();
@@ -89,9 +104,9 @@ public:
     bool displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::Affine3d & T,
                          unsigned int obj_id,Eigen::Vector4d color );
     /// Display a vector of object defined by their ids in Rviz
-    bool displayObjects ( std::vector<unsigned int> object_ids );
+    bool displayObjects ( std::vector<unsigned int> object_ids,std::string frame_name="world" );
     /// Display all  objects defined by their ids in Rviz
-    bool displayObjects();
+    bool displayObjects(std::string frame_name="world");
     /// Publish a point in RVIZ
     void publishPoint ( Eigen::Vector3d pose,
                         std::string mkr_namespace,
@@ -106,6 +121,10 @@ public:
 
     /// Check the collision between a primitives and the known world. Return true if in collision
     bool checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
+                                     const  Eigen::Affine3d  & wT1
+                                   );
+    /// Check the collision between a mesh and the known world. Return true if in collision
+    bool checkCollisionObjectWorld ( const shape_msgs::Mesh  & s1,
                                      const  Eigen::Affine3d  & wT1
                                    );
     // Check the collision between a primitives and the known world. Return true if in collision, also returns a list of colliding objects
@@ -126,8 +145,42 @@ public:
                                     std::vector<Eigen::Vector3d> & wP1,
                                     std::vector<Eigen::Vector3d> & wPobjs
                                   );
-
-
+    
+    /** Gets the distance from the object( shape s1 location wT1) and the collision world
+    * Returns:
+    *    1. objs_distance a vector of distances (len = nbr of objects)
+    *    2. id_collision_objects an ordered vector of collision object ids
+    *    3. wP1 a vector of points (len = nbr of objects) closest pt on primitives to objects
+    *    4. wPobjs a vector of points (len = nbr of objects) closest pt on objects to primitives*/
+    bool checkDistanceObjectWorld ( const shape_msgs::Mesh  & s1,
+                                    const  Eigen::Affine3d  & wT1,
+                                    std::vector<int> & id_collision_objects,
+                                    std::vector<double> & objs_distance,
+                                    std::vector<Eigen::Vector3d> & wP1,
+                                    std::vector<Eigen::Vector3d> & wPobjs
+                                  );
+    
+    
+    /// Get the minimum distance between a solid primitive and the world
+    double checkMinimumDistanceObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
+        const  Eigen::Affine3d  & wT1 );
+    double checkMinimumDistanceObjectWorld ( const shape_msgs::Mesh  & s1,
+        const  Eigen::Affine3d  & wT1 );
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     /// Create a collision fcl geometry from a ros msgs
     static  FCLCollisionGeometryPtr createCollisionGeometry ( const shape_msgs::SolidPrimitive & s1 );
     /// Create a collision fcl geometry from a ros msgs
@@ -135,6 +188,9 @@ public:
     /// Create a collision fcl geometry from a ros msgs
     static  FCLCollisionGeometryPtr createCollisionGeometry ( const shape_msgs::Mesh  & s1 );
 
+    
+    
+    
     // Returns the distance between two solid primitives
     static double checkDistanceObjects ( const shape_msgs::SolidPrimitive & s1,
                                          const  Eigen::Affine3d  & wT1,
@@ -150,14 +206,36 @@ public:
                                          Eigen::Vector3d & wP1,
                                          Eigen::Vector3d & wP2
                                        );
+    
+        /** Returns the distance between two solid primitives
+    * Also returns the position w.r.t to world frame of the closest points */
+    static double checkDistanceObjects ( const shape_msgs::Mesh & s1,
+                                         const  Eigen::Affine3d  & wT1,
+                                         const shape_msgs::Mesh  &  s2,
+                                         const Eigen::Affine3d  & wT2,
+                                         Eigen::Vector3d & wP1,
+                                         Eigen::Vector3d & wP2
+                                       );
+        /** Returns the distance between two solid primitives
+    * Also returns the position w.r.t to world frame of the closest points */
+    static double checkDistanceObjects ( const shape_msgs::Mesh & s1,
+                                         const  Eigen::Affine3d  & wT1,
+                                         const shape_msgs::SolidPrimitive  &  s2,
+                                         const Eigen::Affine3d  & wT2,
+                                         Eigen::Vector3d & wP1,
+                                         Eigen::Vector3d & wP2
+                                       );
+    
+    
+    
     /** Returns the distance between two solid primitives
     * Also returns the position w.r.t to world frame of the closest points */
     static double checkDistanceObjects ( const  FCLObject & object1,
                                          const  FCLObject & object2,
                                          Eigen::Vector3d & closest_pt_object1,
                                          Eigen::Vector3d & closest_pt_object2
-                                       );
-
+                                       );    
+    
     /** Gets the distance from the FCLObject and the FCLObjectSet
     * Returns:
     *    1. objs_distance a vector of distances (len = nbr of objects)
@@ -182,7 +260,19 @@ public:
             std::vector<Eigen::Vector3d> & closest_pt_robot,
             std::vector<Eigen::Vector3d> & closest_pt_objects
                                              );
-
+ /** Gets the distance from the object( mesh s1 location wT1) and the FCLObjectSet
+    * Returns:
+    *    1. objs_distance a vector of distances (len = nbr of objects)
+    *    2. closest_pt_robot a vector of points (len = nbr of objects) closest pt on FCLObject to FCLObjectSet
+    *    3. closest_pt_objects a vector of points (len = nbr of objects) closest pt on FCLObjectSet to FCLObject */
+   static   double checkDistanceObjectWorld ( const shape_msgs::Mesh  & s1,
+            const  Eigen::Affine3d  & wT1,
+            FCLObjectSet object_world,
+            std::vector<double> & objs_distance,
+            std::vector<Eigen::Vector3d> & closest_pt_robot,
+            std::vector<Eigen::Vector3d> & closest_pt_objects
+                                             );
+    
     /// Check collision between a ros shape msgs with transform and FCLObjectSet. Returns true if there is a collision
     static bool checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive  & shape,
                                             const  Eigen::Affine3d  & transform, FCLObjectSet object_world );

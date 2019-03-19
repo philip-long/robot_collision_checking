@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>ros_collision_checking</name>
+  <name>robot_collision_checking</name>
   <version>0.0.0</version>
-  <description>The ros_collision_checking package</description>
+  <description>The robot_collision_checking package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/ros_collision_checking</url> -->
+  <!-- <url type="website">http://wiki.ros.org/robot_collision_checking</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -60,23 +60,6 @@
   <depend>eigen</depend>
   <build_depend>cmake_modules</build_depend>
 
-  <!-- <build_export_depend>shape_msgs</build_export_depend>
-  <build_export_depend>geometry_msgs</build_export_depend>
-  <build_export_depend>roscpp</build_export_depend>
-  <build_export_depend>rospy</build_export_depend>
-  <build_export_depend>roslib</build_export_depend>
-  <build_export_depend>std_msgs</build_export_depend>
-  <build_export_depend>geometric_shapes</build_export_depend>
-  <build_export_depend>libfcl-dev</build_export_depend> -->
-<!--
-  <exec_depend>shape_msgs</exec_depend>
-  <exec_depend>roscpp</exec_depend>
-  <exec_depend>eigen</exec_depend>
-  <exec_depend>rospy</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
-  <exec_depend>roslib</exec_depend>
-  <exec_depend>geometry_msgs</exec_depend>
-  <exec_depend>geometric_shapes</exec_depend> -->
 
   <!-- The export tag contains other, unspecified, tags -->
   <export>

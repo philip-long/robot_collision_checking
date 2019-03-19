@@ -1,4 +1,4 @@
-# ROS_COLLISION_CHECKING
+# ROBOT_COLLISION_CHECKING
 A lightweight package to use FCL with a ros message (heavily inspired by moveit's but with FCL 5.0). 
 1. This package is for finding distances and collision between shape primitives described by ros_messages and eigen poses
 2. Collision checking & distance checking can be done by static functions or creating a class and maintaining a world

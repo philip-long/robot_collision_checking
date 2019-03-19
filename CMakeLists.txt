@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(ros_collision_checking)
+project(robot_collision_checking)
 
 
 

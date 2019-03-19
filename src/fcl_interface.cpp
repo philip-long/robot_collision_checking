@@ -1,4 +1,4 @@
-#include <ros_collision_checking/fcl_interface.h>
+#include <robot_collision_checking/fcl_interface.h>
 
 
 
@@ -39,6 +39,31 @@ bool FCLInterface::checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive 
 }
 
 
+bool FCLInterface::checkCollisionObjectWorld ( const shape_msgs::Mesh  & s1,
+        const  Eigen::Affine3d  & wT1
+                                             ) {
+    FCLCollisionGeometryPtr cg=FCLInterface::createCollisionGeometry ( s1 );
+    fcl::Transform3d wTf1;
+    FCLInterface::transform2fcl ( wT1,wTf1 );
+
+
+    FCLCollisionObjectPtr o1 =std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 );
+
+    fcl::CollisionRequestd col_req;
+    fcl::CollisionResultd col_result;
+
+    for ( unsigned int i=0; i<fcl_collision_world.size(); i++ ) {
+        fcl::collide ( o1.get(),
+                       fcl_collision_world[i]->collision_object.get(),
+                       col_req,
+                       col_result );
+        if ( col_result.isCollision() ) {
+            return true;
+        }
+    }
+    return false;
+}
+
 
 bool FCLInterface::checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
         const  Eigen::Affine3d  & wT1,
@@ -68,6 +93,40 @@ bool FCLInterface::checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive 
     return in_collision;
 }
 
+
+
+bool FCLInterface::checkDistanceObjectWorld ( FCLCollisionObjectPtr o1,
+          std::vector<int> & id_collision_objects,
+        std::vector<double> & objs_distance,
+        std::vector<Eigen::Vector3d> & wP1,
+        std::vector<Eigen::Vector3d> & wPobjs)
+{
+   for ( unsigned int i=0; i<fcl_collision_world.size(); i++ ) {
+        fcl::DistanceRequestd dist_req;
+        dist_req.enable_nearest_points=true;
+        fcl::DistanceResultd dist_result;
+        id_collision_objects[i]=fcl_collision_world[i]->collision_id;
+        FCLCollisionObjectPtr p;
+        dist_result.nearest_points[0].setZero();
+        dist_result.nearest_points[1].setZero();
+        dist_req.enable_nearest_points=true;
+        dist_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
+
+        fcl::distance ( o1.get(),
+                        fcl_collision_world[i]->collision_object.get(),
+                        dist_req,
+                        dist_result );
+
+        for ( int j=0; j<3; j++ ) {
+            wP1[i] ( j ) =dist_result.nearest_points[0][j];
+            wPobjs[i] ( j ) =dist_result.nearest_points[1][j];
+        }
+        objs_distance[i]=dist_result.min_distance;
+    }
+  
+}
+
+
 bool FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
         const  Eigen::Affine3d  & wT1,
         std::vector<int> & id_collision_objects,
@@ -91,11 +150,64 @@ bool FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  
 
 
     FCLCollisionObjectPtr o1 =std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 );
+   return checkDistanceObjectWorld (o1,id_collision_objects,objs_distance,wP1,wPobjs);
+}
+
+
+bool FCLInterface::checkDistanceObjectWorld ( const shape_msgs::Mesh  & s1,
+        const  Eigen::Affine3d  & wT1,
+        std::vector<int> & id_collision_objects,
+        std::vector<double> & objs_distance,
+        std::vector<Eigen::Vector3d> & wP1,
+        std::vector<Eigen::Vector3d> & wPobjs
+                                            ) {
+
+    id_collision_objects.clear();
+    id_collision_objects.resize ( fcl_collision_world.size() );
+    wP1.clear();
+    wP1.resize ( fcl_collision_world.size() );
+    wPobjs.clear();
+    wPobjs.resize ( fcl_collision_world.size() );
+    objs_distance.clear();
+    objs_distance.resize ( fcl_collision_world.size() );
+
+    FCLCollisionGeometryPtr cg=FCLInterface::createCollisionGeometry ( s1 );
+    fcl::Transform3d wTf1;
+    FCLInterface::transform2fcl ( wT1,wTf1 );
+    FCLCollisionObjectPtr o1 =std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 );
+    return checkDistanceObjectWorld (o1,id_collision_objects,objs_distance,wP1,wPobjs);
+}
+
+
+double FCLInterface::checkMinimumDistanceObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
+        const  Eigen::Affine3d  & wT1 ) {
+
+    FCLCollisionGeometryPtr cg=FCLInterface::createCollisionGeometry ( s1 );
+    fcl::Transform3d wTf1;
+    FCLInterface::transform2fcl ( wT1,wTf1 );
+    FCLCollisionObjectPtr o1 =std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 );
+    double  min_distance=checkMinimumDistanceObjectWorld ( o1 );
+    return min_distance;
+}
+
+double FCLInterface::checkMinimumDistanceObjectWorld ( const shape_msgs::Mesh  & s1,
+        const  Eigen::Affine3d  & wT1 ) {
+
+    FCLCollisionGeometryPtr cg=FCLInterface::createCollisionGeometry ( s1 );
+    fcl::Transform3d wTf1;
+    FCLInterface::transform2fcl ( wT1,wTf1 );
+    FCLCollisionObjectPtr o1 =std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 );
+    double  min_distance=checkMinimumDistanceObjectWorld ( o1 );
+    return min_distance;
+}
+
+
+double FCLInterface::checkMinimumDistanceObjectWorld ( FCLCollisionObjectPtr o1 ) {
+    double min_distance ( 100 );
     for ( unsigned int i=0; i<fcl_collision_world.size(); i++ ) {
         fcl::DistanceRequestd dist_req;
         dist_req.enable_nearest_points=true;
         fcl::DistanceResultd dist_result;
-        id_collision_objects[i]=fcl_collision_world[i]->collision_id;
         FCLCollisionObjectPtr p;
         dist_result.nearest_points[0].setZero();
         dist_result.nearest_points[1].setZero();
@@ -107,13 +219,16 @@ bool FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  
                         dist_req,
                         dist_result );
 
-        for ( int j=0; j<3; j++ ) {
-            wP1[i] ( j ) =dist_result.nearest_points[0][j];
-            wPobjs[i] ( j ) =dist_result.nearest_points[1][j];
+        if ( min_distance>dist_result.min_distance ) {
+            min_distance=dist_result.min_distance;
         }
-        objs_distance[i]=dist_result.min_distance;
     }
+    return min_distance;
 }
+
+
+
+
 
 
 void FCLInterface::publishPoint ( Eigen::Vector3d pose,
@@ -177,7 +292,7 @@ bool FCLInterface::addCollisionObject ( const shape_msgs::SolidPrimitive & s1,
     fcl::Transform3d wTf1;
     FCLInterface::transform2fcl ( wT1,wTf1 );
     FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 ) ;
-    std::cout<<"Solid count"<<o1.use_count()<<std::endl;
+
     FCLInterfaceCollisionObject *new_col_object ( new FCLInterfaceCollisionObject() );
     new_col_object->collision_object=o1;
     new_col_object->object_type=s1.type;
@@ -192,9 +307,9 @@ bool FCLInterface::addCollisionObject ( const shape_msgs::Plane  & s1,
     fcl::Transform3d wTf1;
     FCLInterface::transform2fcl ( wT1,wTf1 );
     FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 ) ;
-    
-    
-     FCLInterfaceCollisionObject *new_col_object ( new FCLInterfaceCollisionObject() );
+
+
+    FCLInterfaceCollisionObject *new_col_object ( new FCLInterfaceCollisionObject() );
     new_col_object->collision_object=o1;
     new_col_object->object_type=PLANE;
     new_col_object->collision_id=object_id;
@@ -204,21 +319,21 @@ bool FCLInterface::addCollisionObject ( const shape_msgs::Plane  & s1,
 }
 bool FCLInterface::addCollisionObject ( const shape_msgs::Mesh  & s1 ,
                                         const  Eigen::Affine3d  & wT1,unsigned int object_id ) {
-    
+
     FCLCollisionGeometryPtr cg=FCLInterface::createCollisionGeometry ( s1 );
-  
+
     fcl::Transform3d wTf1;
-    FCLInterface::transform2fcl ( wT1,wTf1 );    
-    
+    FCLInterface::transform2fcl ( wT1,wTf1 );
+
     FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 ) ;
-   std::cout<<"Mesh count"<<o1.use_count()<<std::endl;
-   
-     FCLInterfaceCollisionObject *new_col_object ( new FCLInterfaceCollisionObject() );
+    std::cout<<"Mesh count"<<o1.use_count() <<std::endl;
+
+    FCLInterfaceCollisionObject *new_col_object ( new FCLInterfaceCollisionObject() );
     new_col_object->collision_object=o1;
-     new_col_object->object_type=visualization_msgs::Marker::TRIANGLE_LIST;
-     new_col_object->collision_id=object_id;
-     new_col_object->mesh=s1;
-     fcl_collision_world.push_back ( std::unique_ptr<FCLInterfaceCollisionObject> ( new_col_object ) );
+    new_col_object->object_type=visualization_msgs::Marker::TRIANGLE_LIST;
+    new_col_object->collision_id=object_id;
+    new_col_object->mesh=s1;
+    fcl_collision_world.push_back ( std::unique_ptr<FCLInterfaceCollisionObject> ( new_col_object ) );
 }
 bool FCLInterface::removeCollisionObject ( unsigned int object_id ) {
     for ( unsigned int i=0; i<fcl_collision_world.size(); i++ ) {
@@ -259,7 +374,7 @@ bool FCLInterface::displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::A
     ros::spinOnce();
 }
 
-bool FCLInterface::displayObjects() {
+bool FCLInterface::displayObjects ( std::string frame_name ) {
     visualization_msgs::Marker mkr;
     for ( unsigned int i=0; i<fcl_collision_world.size(); i++ ) {
 
@@ -286,7 +401,7 @@ bool FCLInterface::displayObjects() {
             ros::Duration ( 0.1 ).sleep();
         }
         mkr.action=visualization_msgs::Marker::ADD;
-        mkr.header.frame_id="world";
+        mkr.header.frame_id=frame_name;
         mkr.ns="CollisionObjects";
         mkr.lifetime=ros::Duration ( 0.0 );
         mkr.color.a=0.5;
@@ -405,6 +520,37 @@ void FCLInterface::transform2fcl ( const Eigen::Affine3d& b, fcl::Transform3d& f
 }
 
 
+
+
+
+
+
+
+
+
+
+double FCLInterface::checkDistanceObjects ( FCLCollisionObjectPtr o1,
+        FCLCollisionObjectPtr o2,
+        Eigen::Vector3d & wP1,
+        Eigen::Vector3d & wP2 ) {
+
+    fcl::DistanceRequestd dist_req;
+    dist_req.enable_nearest_points=true;
+    dist_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
+    fcl::DistanceResultd dist_result;
+
+    dist_result.nearest_points[0].setZero();
+    dist_result.nearest_points[1].setZero();
+    fcl::distance ( o1.get(), o2.get(), dist_req, dist_result );
+    for ( int i=0; i<3; i++ ) {
+        wP1 ( i ) =dist_result.nearest_points[0][i];
+        wP2 ( i ) =dist_result.nearest_points[1][i];
+    }
+    return dist_result.min_distance;
+
+}
+
+
 double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s1,
         const  Eigen::Affine3d  & wT1,
         const shape_msgs::SolidPrimitive  &  s2,
@@ -415,24 +561,13 @@ double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s
     transform2fcl ( wT2,wTf2 );
     FCLCollisionGeometryPtr cg_1=createCollisionGeometry ( s1 );
     FCLCollisionGeometryPtr cg_2=createCollisionGeometry ( s2 );
-//     fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTf1 );
-//     fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTf2 );
     FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg_1,wTf1 );
     FCLCollisionObjectPtr o2=std::make_shared<fcl::CollisionObjectd> ( cg_2,wTf2 );
-    fcl::DistanceResultd dist_result;
-    fcl::DistanceRequestd dist_req;
-    //dist_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
-    dist_req.enable_nearest_points=false;
-    dist_result.nearest_points[0].setZero();
-    dist_result.nearest_points[1].setZero();
-
-    fcl::distance ( o1.get(), o2.get(), dist_req, dist_result );
-
-//     delete o1;
-//     delete o2;
-
-
-    return dist_result.min_distance;
+    
+     Eigen::Vector3d  wP1,wP2;
+    
+    double dist=checkDistanceObjects ( o1,o2,wP1,wP2 );
+    return dist;
 }
 double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s1,
         const  Eigen::Affine3d  & wT1,
@@ -446,26 +581,47 @@ double FCLInterface::checkDistanceObjects ( const shape_msgs::SolidPrimitive & s
     transform2fcl ( wT2,wTf2 );
     FCLCollisionGeometryPtr cg_1=createCollisionGeometry ( s1 );
     FCLCollisionGeometryPtr cg_2=createCollisionGeometry ( s2 );
-//     fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTf1 );
-//     fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTf2 );
     FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg_1,wTf1 );
     FCLCollisionObjectPtr o2=std::make_shared<fcl::CollisionObjectd> ( cg_2,wTf2 );
-    fcl::DistanceRequestd dist_req;
-    dist_req.enable_nearest_points=true;
-    dist_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
-    fcl::DistanceResultd dist_result;
+    double dist=checkDistanceObjects ( o1,o2,wP1,wP2 );
+    return dist;
+}
 
-    dist_result.nearest_points[0].setZero();
-    dist_result.nearest_points[1].setZero();
-    fcl::distance ( o1.get(), o2.get(), dist_req, dist_result );
-    for ( int i=0; i<3; i++ ) {
-        wP1 ( i ) =dist_result.nearest_points[0][i];
-        wP2 ( i ) =dist_result.nearest_points[1][i];
-    }
+double FCLInterface::checkDistanceObjects ( const shape_msgs::Mesh & s1,
+        const  Eigen::Affine3d  & wT1,
+        const shape_msgs::Mesh  &  s2,
+        const Eigen::Affine3d  & wT2,
+        Eigen::Vector3d & wP1,
+        Eigen::Vector3d & wP2
+                                          ) {
+    fcl::Transform3d wTf1,wTf2;
+    transform2fcl ( wT1,wTf1 );
+    transform2fcl ( wT2,wTf2 );
+    FCLCollisionGeometryPtr cg_1=createCollisionGeometry ( s1 );
+    FCLCollisionGeometryPtr cg_2=createCollisionGeometry ( s2 );
+    FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg_1,wTf1 );
+    FCLCollisionObjectPtr o2=std::make_shared<fcl::CollisionObjectd> ( cg_2,wTf2 );
+    double dist=checkDistanceObjects ( o1,o2,wP1,wP2 );
+    return dist;
+}
 
-//     delete o1;
-//     delete o2;
-    return dist_result.min_distance;
+
+double FCLInterface::checkDistanceObjects ( const shape_msgs::Mesh & s1,
+        const  Eigen::Affine3d  & wT1,
+        const shape_msgs::SolidPrimitive  &  s2,
+        const Eigen::Affine3d  & wT2,
+        Eigen::Vector3d & wP1,
+        Eigen::Vector3d & wP2
+                                          ) {
+    fcl::Transform3d wTf1,wTf2;
+    transform2fcl ( wT1,wTf1 );
+    transform2fcl ( wT2,wTf2 );
+    FCLCollisionGeometryPtr cg_1=createCollisionGeometry ( s1 );
+    FCLCollisionGeometryPtr cg_2=createCollisionGeometry ( s2 );
+    FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg_1,wTf1 );
+    FCLCollisionObjectPtr o2=std::make_shared<fcl::CollisionObjectd> ( cg_2,wTf2 );
+    double dist=checkDistanceObjects ( o1,o2,wP1,wP2 );
+    return dist;
 }
 
 double FCLInterface::checkDistanceObjectWorld ( FCLObject link,
@@ -496,6 +652,32 @@ double FCLInterface::checkDistanceObjectWorld ( FCLObject link,
 
 
 double FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive  & shape,
+        const  Eigen::Affine3d  & transform,
+        FCLObjectSet object_world,
+        std::vector<double> & objs_distance,
+        std::vector<Eigen::Vector3d> & closest_pt_robot,
+        std::vector<Eigen::Vector3d> & closest_pt_objects
+                                              ) {
+    closest_pt_robot.clear();
+    closest_pt_robot.resize ( object_world.size() );
+    closest_pt_objects.clear();
+    closest_pt_objects.resize ( object_world.size() );
+    objs_distance.clear();
+    objs_distance.resize ( object_world.size() );
+
+
+    for ( unsigned int i=0; i<object_world.size(); i++ ) {
+        objs_distance[i]=checkDistanceObjects ( shape,
+                                                transform,
+                                                object_world[i].object_shape,
+                                                object_world[i].object_transform,
+                                                closest_pt_robot[i],
+                                                closest_pt_objects[i] );
+    }
+
+}
+
+double FCLInterface::checkDistanceObjectWorld ( const shape_msgs::Mesh  & shape,
         const  Eigen::Affine3d  & transform,
         FCLObjectSet object_world,
         std::vector<double> & objs_distance,
