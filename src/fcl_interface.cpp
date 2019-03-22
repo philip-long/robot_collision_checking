@@ -404,7 +404,8 @@ bool FCLInterface::displayObjects ( std::string frame_name ) {
         mkr.header.frame_id=frame_name;
         mkr.ns="CollisionObjects";
         mkr.lifetime=ros::Duration ( 0.0 );
-        mkr.color.a=0.5;
+        mkr.color.a=1.0;
+	mkr.color.g=1.0;
 
         Eigen::Quaterniond q ( wTf2.linear() );
         mkr.pose.position.x=wTf2 ( 0,3 );

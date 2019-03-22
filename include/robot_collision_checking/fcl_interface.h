@@ -103,9 +103,7 @@ public:
     /// Display a marker defined by its ROS msgs in rviz
     bool displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::Affine3d & T,
                          unsigned int obj_id,Eigen::Vector4d color );
-    /// Display a vector of object defined by their ids in Rviz
-    bool displayObjects ( std::vector<unsigned int> object_ids,std::string frame_name="world" );
-    /// Display all  objects defined by their ids in Rviz
+    /// Display all  objects 
     bool displayObjects(std::string frame_name="world");
     /// Publish a point in RVIZ
     void publishPoint ( Eigen::Vector3d pose,
@@ -115,9 +113,6 @@ public:
                         std::vector<double> color,
                         std::vector<double> scale
                       );
-
-    /// Display an object set in RVIZ
-    static bool displayObjects ( FCLObjectSet objects );
 
     /// Check the collision between a primitives and the known world. Return true if in collision
     bool checkCollisionObjectWorld ( const shape_msgs::SolidPrimitive  & s1,
