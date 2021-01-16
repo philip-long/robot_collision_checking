@@ -78,7 +78,9 @@ older version of FCL. Lastly, none of the examples from FCL homepage will work a
 
 
 
+# Update Ubuntu 20.04
 
+liboctomap.so.1.8
 
 
 
