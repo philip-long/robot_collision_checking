@@ -1,0 +1,8 @@
+<launch>
+       
+<node name="create_cloud_xyzrgb" pkg="robot_collision_checking" type="create_cloud_xyzrgb.py"/>
+   
+ <include file="$(find octomap_server)/launch/octomap_tracking_server.launch" />
+ 
+</launch>
+

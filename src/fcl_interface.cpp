@@ -123,7 +123,7 @@ bool FCLInterface::checkDistanceObjectWorld ( FCLCollisionObjectPtr o1,
         }
         objs_distance[i]=dist_result.min_distance;
     }
-  
+  return true;
 }
 
 
@@ -299,6 +299,7 @@ bool FCLInterface::addCollisionObject ( const shape_msgs::SolidPrimitive & s1,
     new_col_object->collision_id=object_id;
     new_col_object->solid=s1;
     fcl_collision_world.push_back ( std::unique_ptr<FCLInterfaceCollisionObject> ( new_col_object ) );
+    return true;
 }
 bool FCLInterface::addCollisionObject ( const shape_msgs::Plane  & s1,
                                         const  Eigen::Affine3d  & wT1, unsigned int object_id ) {
@@ -315,6 +316,7 @@ bool FCLInterface::addCollisionObject ( const shape_msgs::Plane  & s1,
     new_col_object->collision_id=object_id;
     new_col_object->plane=s1;
     fcl_collision_world.push_back ( std::unique_ptr<FCLInterfaceCollisionObject> ( new_col_object ) );
+    return true;
 
 }
 bool FCLInterface::addCollisionObject ( const shape_msgs::Mesh  & s1 ,
@@ -334,7 +336,13 @@ bool FCLInterface::addCollisionObject ( const shape_msgs::Mesh  & s1 ,
     new_col_object->collision_id=object_id;
     new_col_object->mesh=s1;
     fcl_collision_world.push_back ( std::unique_ptr<FCLInterfaceCollisionObject> ( new_col_object ) );
+    return true;
 }
+
+
+// adding octomap here
+
+
 bool FCLInterface::removeCollisionObject ( unsigned int object_id ) {
     for ( unsigned int i=0; i<fcl_collision_world.size(); i++ ) {
         if ( object_id==fcl_collision_world[i]->collision_id ) {
@@ -372,6 +380,7 @@ bool FCLInterface::displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::A
     mkr.pose.orientation.z=q.z();
     mkr_pub.publish ( mkr );
     ros::spinOnce();
+    return true;
 }
 
 bool FCLInterface::displayObjects ( std::string frame_name ) {
@@ -386,8 +395,10 @@ bool FCLInterface::displayObjects ( std::string frame_name ) {
         if ( fcl_collision_world[i]->object_type==visualization_msgs::Marker::TRIANGLE_LIST ) {
             geometric_shapes::constructMarkerFromShape ( fcl_collision_world[i]->mesh,mkr );
         } else if ( fcl_collision_world[i]->object_type==PLANE ) {
-
-        } else if ( fcl_collision_world[i]->object_type==shape_msgs::SolidPrimitive::SPHERE ||
+            ROS_WARN("Unable to display plane");
+        } 
+        
+        else if ( fcl_collision_world[i]->object_type==shape_msgs::SolidPrimitive::SPHERE ||
                     fcl_collision_world[i]->object_type==shape_msgs::SolidPrimitive::BOX ||
                     fcl_collision_world[i]->object_type==shape_msgs::SolidPrimitive::CYLINDER ) {
             geometric_shapes::constructMarkerFromShape ( fcl_collision_world[i]->solid,mkr );
@@ -419,6 +430,7 @@ bool FCLInterface::displayObjects ( std::string frame_name ) {
         ros::spinOnce();
         ros::Duration ( 0.02 ).sleep();
     }
+    return true;
 }
 
 
@@ -452,6 +464,12 @@ FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry
     return g;
 }
 
+
+// Plane is defined as a x + by + cz + d = 0;
+FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry
+( const std::shared_ptr<const octomap::OcTree>& tree) {
+       return FCLCollisionGeometryPtr (new fcl::OcTreed (tree));
+}
 
 // Plane is defined as a x + by + cz + d = 0;
 FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry
@@ -513,6 +531,7 @@ FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry ( const shape_msgs
     }
 
 }
+
 
 
 void FCLInterface::transform2fcl ( const Eigen::Affine3d& b, fcl::Transform3d& f ) {
@@ -675,6 +694,7 @@ double FCLInterface::checkDistanceObjectWorld ( const shape_msgs::SolidPrimitive
                                                 closest_pt_robot[i],
                                                 closest_pt_objects[i] );
     }
+        return true;
 
 }
 
@@ -701,6 +721,7 @@ double FCLInterface::checkDistanceObjectWorld ( const shape_msgs::Mesh  & shape,
                                                 closest_pt_robot[i],
                                                 closest_pt_objects[i] );
     }
+    return true;
 
 }
 

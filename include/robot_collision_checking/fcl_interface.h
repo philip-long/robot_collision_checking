@@ -20,6 +20,7 @@
 #include <shape_msgs/Mesh.h>
 #include <geometry_msgs/Pose.h>
 #include <geometric_shapes/shape_to_marker.h>
+#include <octomap/octomap.h>
 
 #ifndef FCL_INTERFACE_HPP
 #define FCL_INTERFACE_HPP
@@ -99,6 +100,11 @@ public:
     bool addCollisionObject ( const shape_msgs::Mesh  & s1 ,
                               const  Eigen::Affine3d  & wT1,unsigned int object_id );
     /// Delete a collision object with object id
+    
+    
+    
+    
+
     bool removeCollisionObject ( unsigned int object_id );
     /// Display a marker defined by its ROS msgs in rviz
     bool displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::Affine3d & T,
@@ -182,7 +188,8 @@ public:
     static  FCLCollisionGeometryPtr createCollisionGeometry ( const shape_msgs::Plane  & s1 );
     /// Create a collision fcl geometry from a ros msgs
     static  FCLCollisionGeometryPtr createCollisionGeometry ( const shape_msgs::Mesh  & s1 );
-
+    /// Create a collision fcl geometry from a octree
+    static FCLCollisionGeometryPtr createCollisionGeometry( const std::shared_ptr<const octomap::OcTree>& tree);
     
     
     

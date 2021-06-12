@@ -22,6 +22,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
 find_package(CCD REQUIRED)
 find_package(Eigen3 REQUIRED)
+find_package(octomap REQUIRED)
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/FindFCL.cmake")
 find_package(FCL REQUIRED)
@@ -72,6 +73,7 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
   ${FCL_INCLUDE_DIRS}
   ${CCD_INCLUDE_DIRS}
+  ${OCTOMAP_INCLUDE_DIRS}
 )
 
 add_definitions(${PCL_DEFINITIONS})
@@ -81,7 +83,9 @@ add_library(fcl_interface
    include/${PROJECT_NAME}/fcl_interface.h
 )
 add_executable(testing ./src/test_file.cpp)
-add_executable(test_fcl_inter ./src/fcl_interface.cpp)
+add_executable(test_fcl_inter ./src/fcl_interface_test.cpp)
+target_link_libraries(test_fcl_inter ${catkin_LIBRARIES} fcl_interface)
+
 
 target_link_libraries(testing ${catkin_LIBRARIES}
                       ${FCL_LIBRARIES}
@@ -89,7 +93,8 @@ target_link_libraries(testing ${catkin_LIBRARIES}
 target_link_libraries(test_fcl_inter
                         ${catkin_LIBRARIES}
                         ${FCL_LIBRARIES}
-                        ${CCD_LIBRARIES})
+                        ${CCD_LIBRARIES}
+                        ${OCTOMAP_LIBRARIES})
 
 add_dependencies(fcl_interface
 		  ${${PROJECT_NAME}_EXPORTED_TARGETS}
