@@ -4,5 +4,10 @@
    
  <include file="$(find octomap_server)/launch/octomap_tracking_server.launch" />
  
+   <node pkg="tf"
+        type="static_transform_publisher"
+        name="link1_broadcaster"
+        args="0 0 0 0 0 0 world map 100" /> https://github.com/flexible-collision-library/fcl/blob/master/test/test_fcl_octomap_distance.cpp
+ 
 </launch>
 

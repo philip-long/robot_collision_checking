@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   roslib
   eigen_conversions
   geometric_shapes
+  octomap_msgs
   )
 
 
@@ -80,11 +81,16 @@ add_definitions(${PCL_DEFINITIONS})
 
 add_library(fcl_interface
    src/fcl_interface.cpp
+   src/static_fcl_interface.cpp
    include/${PROJECT_NAME}/fcl_interface.h
 )
-add_executable(testing ./src/test_file.cpp)
-add_executable(test_fcl_inter ./src/fcl_interface_test.cpp)
+add_executable(testing ./tests/test_file.cpp)
+add_executable(test_fcl_inter ./tests/test_fcl.cpp)
+add_executable(test_fcl_octo ./tests/test_octo.cpp)
+
 target_link_libraries(test_fcl_inter ${catkin_LIBRARIES} fcl_interface)
+target_link_libraries(test_fcl_octo ${catkin_LIBRARIES} fcl_interface)
+
 
 
 target_link_libraries(testing ${catkin_LIBRARIES}
@@ -96,6 +102,12 @@ target_link_libraries(test_fcl_inter
                         ${CCD_LIBRARIES}
                         ${OCTOMAP_LIBRARIES})
 
+target_link_libraries(test_fcl_octo
+                        ${catkin_LIBRARIES}
+                        ${FCL_LIBRARIES}
+                        ${CCD_LIBRARIES}
+                        ${OCTOMAP_LIBRARIES})
+                        
 add_dependencies(fcl_interface
 		  ${${PROJECT_NAME}_EXPORTED_TARGETS}
 		  ${catkin_EXPORTED_TARGETS}

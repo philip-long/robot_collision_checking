@@ -21,6 +21,7 @@
 #include <geometry_msgs/Pose.h>
 #include <geometric_shapes/shape_to_marker.h>
 #include <octomap/octomap.h>
+#include <octomap_msgs/conversions.h>
 
 #ifndef FCL_INTERFACE_HPP
 #define FCL_INTERFACE_HPP
@@ -30,7 +31,15 @@ typedef std::shared_ptr<fcl::CollisionObjectd> FCLCollisionObjectPtr;
 typedef std::shared_ptr<fcl::CollisionGeometryd> FCLCollisionGeometryPtr;
 
 
-int PLANE=10;
+
+#if !defined(MYLIB_CONSTANTS_H)
+#define MYLIB_CONSTANTS_H 1
+
+const int PLANE=10;
+const int OCTOMAP_INT = 20;
+
+#endif
+
 /// A collision object to interface with ros
 struct FCLInterfaceCollisionObject {
     FCLCollisionObjectPtr collision_object;
@@ -99,6 +108,10 @@ public:
     /// Add a collision objects defined by a ROS mesh msgs with a defined id to the world
     bool addCollisionObject ( const shape_msgs::Mesh  & s1 ,
                               const  Eigen::Affine3d  & wT1,unsigned int object_id );
+    // Add an octomap to the world
+    bool addCollisionObject(const octomap_msgs::Octomap &map,
+                            const  Eigen::Affine3d  & wT1,
+                            unsigned int object_id);
     /// Delete a collision object with object id
     
     
@@ -169,16 +182,7 @@ public:
         const  Eigen::Affine3d  & wT1 );
     
     
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+     
     
     
     
@@ -188,6 +192,8 @@ public:
     static  FCLCollisionGeometryPtr createCollisionGeometry ( const shape_msgs::Plane  & s1 );
     /// Create a collision fcl geometry from a ros msgs
     static  FCLCollisionGeometryPtr createCollisionGeometry ( const shape_msgs::Mesh  & s1 );
+    /// Create a collision fcl geometry from a octree
+    static FCLCollisionGeometryPtr createCollisionGeometry(const octomap_msgs::Octomap &map);
     /// Create a collision fcl geometry from a octree
     static FCLCollisionGeometryPtr createCollisionGeometry( const std::shared_ptr<const octomap::OcTree>& tree);
     

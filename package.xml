@@ -53,6 +53,7 @@
   <depend>shape_msgs</depend>
   <depend>roscpp</depend>
   <depend>rospy</depend>
+  <depend>octomap_msgs</depend>
   <depend>roslib</depend>
   <depend>std_msgs</depend>
   <depend>libfcl-dev</depend>

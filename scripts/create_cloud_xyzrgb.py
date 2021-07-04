@@ -26,7 +26,7 @@ def talker():
     header.frame_id = "map"
 
 
-    lim = 4
+    lim = 1
     while not rospy.is_shutdown():
         points = []
         for i in range(lim):

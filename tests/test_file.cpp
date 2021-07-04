@@ -5,6 +5,7 @@
 #include <fcl/narrowphase/collision.h>
 #include <fcl/narrowphase/distance.h>
 #include <ccd/vec3.h>
+#include <robot_collision_checking/fcl_interface.h>
 //#include <fcl/geometry/bvh/BVH_model.h>
 
 
@@ -88,6 +89,7 @@ int main() {
 //      
       std::cout<<"Min distance "<<dist_result5.min_distance<<std::endl;
       std::cout<<"Nearest point 1   = "<<dist_result5.nearest_points[0]<<std::endl;
+      
       std::cout<<"Nearest point 2   = "<<dist_result5.nearest_points[1]<<std::endl;   
     return 0;
 }
