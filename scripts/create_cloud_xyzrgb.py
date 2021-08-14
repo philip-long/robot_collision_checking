@@ -26,7 +26,7 @@ def talker():
     header.frame_id = "map"
 
 
-    lim = 1
+    lim = 3
     while not rospy.is_shutdown():
         points = []
         for i in range(lim):
@@ -40,8 +40,8 @@ def talker():
                     b = int(z * 255.0)
                     a = 255
                     rgb = struct.unpack('I', struct.pack('BBBB', b, g, r, a))[0]
-                    x=x*np.random.random_sample()
-                    z=z * np.random.random_sample()
+                    x=x*np.random.random_sample()*1.5
+                    z=z * np.random.random_sample()*2.0
                     y = y * random.random()*2.0
                     pt = [x, y, z, rgb]
                     points.append(pt)

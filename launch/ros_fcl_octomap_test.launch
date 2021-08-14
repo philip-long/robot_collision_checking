@@ -7,7 +7,12 @@
    <node pkg="tf"
         type="static_transform_publisher"
         name="link1_broadcaster"
-        args="0 0 0 0 0 0 world map 100" /> https://github.com/flexible-collision-library/fcl/blob/master/test/test_fcl_octomap_distance.cpp
+        args="0 0 0 0 0 0 world map 100" /> 
+ 
+ 
+ <node name="test_fcl_octo" pkg="robot_collision_checking" type="test_fcl_octo" output="screen"/>
+ 
+  <node name="rviz" pkg="rviz" type="rviz"/>
  
 </launch>
 
