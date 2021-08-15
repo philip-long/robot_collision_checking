@@ -49,7 +49,7 @@ struct FCLInterfaceCollisionObject {
     shape_msgs::Mesh mesh;
     shape_msgs::SolidPrimitive solid;
     ~FCLInterfaceCollisionObject() {
-        std::cout<<"Destroying object  "<<collision_id<<std::endl;
+        // std::cout<<"Destroying object  "<<collision_id<<std::endl;
     };
 };
 
@@ -90,6 +90,7 @@ private:
         std::vector<double> & objs_distance,
         std::vector<Eigen::Vector3d> & wP1,
         std::vector<Eigen::Vector3d> & wPobjs);
+        
 public:
     FCLInterface ( ros::NodeHandle nh );
     ~FCLInterface();

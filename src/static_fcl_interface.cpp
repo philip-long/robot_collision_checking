@@ -119,6 +119,7 @@ double FCLInterface::checkDistanceObjectWorld ( FCLObject link,
                                                 closest_pt_robot[i],
                                                 closest_pt_objects[i] );
     }
+    return 1.0; // this is lazy sorry :/
 
 }
 

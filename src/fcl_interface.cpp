@@ -403,6 +403,12 @@ bool FCLInterface::displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::A
 
 bool FCLInterface::displayObjects ( std::string frame_name ) {
     visualization_msgs::Marker mkr;
+    while ( mkr_pub.getNumSubscribers() <1 ) {
+            ROS_INFO ( "Waiting for Marker Subs" );
+            ros::spinOnce();
+            ros::Duration ( 0.1 ).sleep();
+    }
+        
     for ( unsigned int i=0; i<fcl_collision_world.size(); i++ ) {
 
 
@@ -426,17 +432,13 @@ bool FCLInterface::displayObjects ( std::string frame_name ) {
 
 
 
-        while ( mkr_pub.getNumSubscribers() <1 ) {
-            ROS_INFO ( "Waiting for Marker Subs" );
-            ros::spinOnce();
-            ros::Duration ( 0.1 ).sleep();
-        }
+
         mkr.action=visualization_msgs::Marker::ADD;
         mkr.header.frame_id=frame_name;
         mkr.ns="CollisionObjects";
         mkr.lifetime=ros::Duration ( 0.0 );
         mkr.color.a=1.0;
-	mkr.color.g=1.0;
+        mkr.color.g=1.0;
 
         Eigen::Quaterniond q ( wTf2.linear() );
         mkr.pose.position.x=wTf2 ( 0,3 );
@@ -447,7 +449,7 @@ bool FCLInterface::displayObjects ( std::string frame_name ) {
         mkr.pose.orientation.y=q.y();
         mkr.pose.orientation.z=q.z();
         mkr_pub.publish ( mkr );
-        ros::spinOnce();
+        
         ros::Duration ( 0.02 ).sleep();
     }
     return true;

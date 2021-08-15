@@ -40,9 +40,9 @@ def talker():
                     b = int(z * 255.0)
                     a = 255
                     rgb = struct.unpack('I', struct.pack('BBBB', b, g, r, a))[0]
-                    x=x*np.random.random_sample()*1.5
-                    z=z * np.random.random_sample()*2.0
-                    y = y * random.random()*2.0
+                    x=0.2+(x*np.random.random_sample()*1.5)
+                    z=z * np.random.random_sample()*0.2
+                    y = 0.2+y * random.random()*2.0
                     pt = [x, y, z, rgb]
                     points.append(pt)
 
