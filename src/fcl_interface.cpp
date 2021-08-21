@@ -261,7 +261,7 @@ void FCLInterface::publishPoint ( Eigen::Vector3d pose,
     mkr.scale.z=scale[2];
     while ( mkr_pub.getNumSubscribers() <1 && ros::ok() ) {
         ROS_INFO ( "Waiting for subs" );
-        ros::spinOnce();
+        ros::Duration(0.1).sleep();
     }
     mkr_pub.publish ( mkr );
 
@@ -376,7 +376,7 @@ bool FCLInterface::displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::A
     geometric_shapes::constructMarkerFromShape ( s1,mkr );
     while ( mkr_pub.getNumSubscribers() <1 ) {
         ROS_INFO_ONCE ( "Waiting until marker is displayed in RVIZ" );
-        ros::spinOnce();
+        //ros::spinOnce();
         ros::Duration ( 0.05 ).sleep();
     }
     mkr.action=visualization_msgs::Marker::ADD;
@@ -397,7 +397,7 @@ bool FCLInterface::displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::A
     mkr.pose.orientation.y=q.y();
     mkr.pose.orientation.z=q.z();
     mkr_pub.publish ( mkr );
-    ros::spinOnce();
+    //ros::spinOnce();
     return true;
 }
 
@@ -405,7 +405,7 @@ bool FCLInterface::displayObjects ( std::string frame_name ) {
     visualization_msgs::Marker mkr;
     while ( mkr_pub.getNumSubscribers() <1 ) {
             ROS_INFO ( "Waiting for Marker Subs" );
-            ros::spinOnce();
+            //ros::spinOnce();
             ros::Duration ( 0.1 ).sleep();
     }
         
