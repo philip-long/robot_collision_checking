@@ -20,8 +20,13 @@
 #include <shape_msgs/Mesh.h>
 #include <geometry_msgs/Pose.h>
 #include <geometric_shapes/shape_to_marker.h>
+#include <geometric_shapes/bodies.h>
+#include <geometric_shapes/body_operations.h>
 #include <octomap/octomap.h>
+#include <octomap/OcTreeKey.h>
 #include <octomap_msgs/conversions.h>
+#include <eigen_conversions/eigen_msg.h>
+#include <std_msgs/String.h>
 
 #ifndef FCL_INTERFACE_HPP
 #define FCL_INTERFACE_HPP
@@ -113,11 +118,17 @@ public:
     bool addCollisionObject(const octomap_msgs::Octomap &map,
                             const  Eigen::Affine3d  & wT1,
                             unsigned int object_id);
+    // Add an Collision Geomtery to the world                            
+    bool addCollisionObject(FCLCollisionGeometryPtr cg,
+                            const  Eigen::Affine3d  & wT1,
+                            unsigned int object_id);                            
     /// Delete a collision object with object id
     
+    /// Attempt to filter an object from octomap and return the filtered collision object
+    FCLCollisionGeometryPtr FilterObjectFromOctomap(const octomap_msgs::Octomap& map,
+                                 shapes::ShapeMsg current_shape,const geometry_msgs::Pose &shapes_pose);
     
-    
-    
+    std::shared_ptr<octomap::OcTree> convertOctomaptoOctree(const octomap_msgs::Octomap& map);
 
     bool removeCollisionObject ( unsigned int object_id );
     /// Display a marker defined by its ROS msgs in rviz

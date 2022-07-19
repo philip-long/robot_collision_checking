@@ -2,6 +2,7 @@
 
 
 
+
 FCLInterface::FCLInterface ( ros::NodeHandle nh ) : nh_ ( nh ) {
     mkr_pub=nh_.advertise<visualization_msgs::Marker>
             ( "/visualization_marker",1 );
@@ -359,6 +360,21 @@ bool FCLInterface::addCollisionObject(const octomap_msgs::Octomap &map,
     return true;
 }
     
+bool FCLInterface::addCollisionObject(FCLCollisionGeometryPtr cg,
+                            const  Eigen::Affine3d  & wT1,
+                            unsigned int object_id)
+{    
+    fcl::Transform3d wTf1;
+    FCLInterface::transform2fcl ( wT1,wTf1 );
+    FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg,wTf1 ) ;
+    
+    FCLInterfaceCollisionObject *new_col_object ( new FCLInterfaceCollisionObject() );
+    new_col_object->collision_object=o1;
+    new_col_object->object_type=OCTOMAP_INT;
+    new_col_object->collision_id=object_id;    
+    fcl_collision_world.push_back ( std::unique_ptr<FCLInterfaceCollisionObject> ( new_col_object ) );    
+    return true;
+}
 
 
 bool FCLInterface::removeCollisionObject ( unsigned int object_id ) {
@@ -485,11 +501,87 @@ FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry
     return g;
 }
 
+std::shared_ptr<octomap::OcTree> FCLInterface::convertOctomaptoOctree(const octomap_msgs::Octomap& map)
+{
+    std::shared_ptr<octomap::OcTree> om(static_cast<octomap::OcTree*>(octomap_msgs::msgToMap(map)));
+    return om;
+}
+
+
+FCLCollisionGeometryPtr FCLInterface::FilterObjectFromOctomap(const octomap_msgs::Octomap& map,shapes::ShapeMsg current_shape,const geometry_msgs::Pose &shapes_pose)
+{        
+
+        bodies::AABB bbox;
+        if (current_shape.which() == 0)
+        {
+            shape_msgs::SolidPrimitive s1=boost::get<shape_msgs::SolidPrimitive>(current_shape);  
+            bodies::Body *body =bodies::constructBodyFromMsg ( s1,shapes_pose);
+            
+            body->computeBoundingBox(bbox);        
+            std::cout<<"\n bbox.x() "<<bbox.min().x()<<","<<bbox.max().x()<<std::endl;
+            std::cout<<"bbox.y() "<<bbox.min().y()<<","<<bbox.max().y()<<std::endl;
+            std::cout<<"bbox.z() "<<bbox.min().z()<<","<<bbox.max().z()<<std::endl;                        
+        }
+        else if (current_shape.which() == 1)
+        {
+            shape_msgs::Mesh s1=boost::get<shape_msgs::Mesh>(current_shape);     
+            bodies::Body *body =bodies::constructBodyFromMsg ( s1,shapes_pose);
+            
+            body->computeBoundingBox(bbox);     
+            std::cout<<"MESH \n \n bbox.x()"<<bbox.min().x()<<","<<bbox.max().x()<<std::endl;
+            std::cout<<"bbox.y() "<<bbox.min().y()<<","<<bbox.max().y()<<std::endl;
+            std::cout<<"bbox.z() "<<bbox.min().z()<<","<<bbox.max().z()<<std::endl;  
+        }
+    std::cout<<"Created Octree "<<std::endl;
+    // https://github.com/OctoMap/octomap/issues/283
+    // http://docs.ros.org/en/api/octomap/html/test__iterators_8cpp.html#a757a73d2b6caa01e89e18dc44285f02f
+        std::shared_ptr<octomap::OcTree> om(static_cast<octomap::OcTree*>(octomap_msgs::msgToMap(map)));
+    
+
+  
+    octomap::OcTreeKey minKey, maxKey;
+    om->coordToKeyChecked(bbox.min().x(),bbox.min().y(),bbox.min().z(), minKey);  
+    om->coordToKeyChecked(bbox.max().x(),bbox.max().y(),bbox.max().z(), maxKey);
+
+    std::cout<<"om->keyToCoord(minKey)"<<om->keyToCoord(minKey)<<std::endl;   
+    std::cout<<"om->keyToCoord(maxKey)"<<om->keyToCoord(maxKey)<<std::endl;   
+        
+    std::cout<<"om->calcNumNodes() = "<<om->getNumLeafNodes()<<std::endl;
+  
+    std::vector<std::pair<octomap::OcTreeKey, unsigned int>> keys;
+    int i=0;
+    for(octomap::OcTree::leaf_iterator it = om->begin_leafs(),
+         end=om->end_leafs(); it!= end; ++it)
+    {
+    //     // check if inside of bbx:
+    i++;
+        octomap::OcTreeKey k = it.getKey();               
+        if  (k[0] >= minKey[0] && k[1] >= minKey[1] && k[2] >= minKey[2]
+            && k[0] <= maxKey[0] && k[1] <= maxKey[1] && k[2] <= maxKey[2]){
+           keys.push_back(std::make_pair(k, it.getDepth())); // add to a stack
+         }
+    }
+    
+    std::cout<<"Number of keys in bounding box"<<keys.size()<<" of total"<<i<<std::endl;
+    // // delete all inside of box (in stack)
+    for(auto k:keys)
+        om->deleteNode(k.first, k.second);
+    
+    std::cout<<"om->calcNumNodes() = "<<om->getNumLeafNodes()<<std::endl;
+    // ROS_DEBUG("Number of voxels removed outside local area: %i", keys.size() );
+  
+    // Not reall sure what to return here
+    return createCollisionGeometry(om);
+}
+
+
 FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry(const octomap_msgs::Octomap& map)
 {
     std::shared_ptr<octomap::OcTree> om(static_cast<octomap::OcTree*>(octomap_msgs::msgToMap(map)));
     return createCollisionGeometry(om);
 }
+
+
 
 FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry
 ( const std::shared_ptr<const octomap::OcTree>& tree) {
