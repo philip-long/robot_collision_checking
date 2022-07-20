@@ -125,11 +125,11 @@ public:
     /// Delete a collision object with object id
     
     /// Filter an object from octomap and return the filtered collision object
-    FCLCollisionGeometryPtr FilterObjectFromOctomap(const octomap_msgs::Octomap& map,
+    FCLCollisionGeometryPtr filterObjectFromOctomap(const octomap_msgs::Octomap& map,
                                  shapes::ShapeMsg current_shape,const geometry_msgs::Pose &shapes_pose);
     
     /// Filter multiple objects from octomap and return the filtered collision object
-    FCLCollisionGeometryPtr FilterObjectFromOctomap(const octomap_msgs::Octomap& map,
+    FCLCollisionGeometryPtr filterObjectFromOctomap(const octomap_msgs::Octomap& map,
                                                                 const std::vector<shapes::ShapeMsg> &current_shape,
                                                                 const std::vector<geometry_msgs::Pose> &shapes_pose);
                                                                 

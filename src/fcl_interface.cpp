@@ -510,7 +510,7 @@ std::shared_ptr<octomap::OcTree> FCLInterface::convertOctomaptoOctree(const octo
 }
 
 
-FCLCollisionGeometryPtr FCLInterface::FilterObjectFromOctomap(const octomap_msgs::Octomap& map,
+FCLCollisionGeometryPtr FCLInterface::filterObjectFromOctomap(const octomap_msgs::Octomap& map,
                                                                 shapes::ShapeMsg current_shape,
                                                                 const geometry_msgs::Pose &shapes_pose)
 {        
@@ -561,7 +561,7 @@ FCLCollisionGeometryPtr FCLInterface::FilterObjectFromOctomap(const octomap_msgs
 }
 
 
-FCLCollisionGeometryPtr FCLInterface::FilterObjectFromOctomap(const octomap_msgs::Octomap& map,
+FCLCollisionGeometryPtr FCLInterface::filterObjectFromOctomap(const octomap_msgs::Octomap& map,
                                                                 const std::vector<shapes::ShapeMsg> &current_shapes,
                                                                 const std::vector<geometry_msgs::Pose> &shapes_poses)
 {        

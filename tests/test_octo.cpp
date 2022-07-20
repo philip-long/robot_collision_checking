@@ -153,7 +153,7 @@ int main ( int argc, char **argv ) {
     poses.push_back(box_pose);
     poses.push_back(sphere2_pose);
 
-    FCLCollisionGeometryPtr cg=test_node.FilterObjectFromOctomap(octomap_,shapes,poses);
+    FCLCollisionGeometryPtr cg=test_node.filterObjectFromOctomap(octomap_,shapes,poses);
     ROS_INFO ( "Removing old Octomap from World" );
     test_node.removeCollisionObject(99);
     ros::Duration(1.0).sleep();
