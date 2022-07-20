@@ -22,6 +22,7 @@
 #include <geometric_shapes/shape_to_marker.h>
 #include <geometric_shapes/bodies.h>
 #include <geometric_shapes/body_operations.h>
+
 #include <octomap/octomap.h>
 #include <octomap/OcTreeKey.h>
 #include <octomap_msgs/conversions.h>
@@ -132,7 +133,7 @@ public:
     FCLCollisionGeometryPtr filterObjectFromOctomap(const octomap_msgs::Octomap& map,
                                                                 const std::vector<shapes::ShapeMsg> &current_shape,
                                                                 const std::vector<geometry_msgs::Pose> &shapes_pose);
-                                                                
+
     std::shared_ptr<octomap::OcTree> convertOctomaptoOctree(const octomap_msgs::Octomap& map);
 
     bool removeCollisionObject ( unsigned int object_id );

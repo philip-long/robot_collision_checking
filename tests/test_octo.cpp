@@ -142,6 +142,8 @@ int main ( int argc, char **argv ) {
     tf::poseEigenToMsg(e_wTs1, sphere_pose);
     tf::poseEigenToMsg(e_wTs2, box_pose);
     tf::poseEigenToMsg(e_wTs3, sphere2_pose);
+
+    
     
     std::vector<shapes::ShapeMsg> shapes;
     
