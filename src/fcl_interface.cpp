@@ -387,7 +387,9 @@ bool FCLInterface::removeCollisionObject ( unsigned int object_id ) {
     return false;
 }
 
-bool FCLInterface::displayMarker ( shape_msgs::SolidPrimitive s1, const Eigen::Affine3d & T,unsigned int obj_id,Eigen::Vector4d color ) {
+bool FCLInterface::displayMarker ( shape_msgs::SolidPrimitive s1, 
+                                    const Eigen::Affine3d & T,
+                                    unsigned int obj_id,Eigen::Vector4d color ) {
     visualization_msgs::Marker mkr;
     geometric_shapes::constructMarkerFromShape ( s1,mkr );
     while ( mkr_pub.getNumSubscribers() <1 ) {
@@ -508,72 +510,111 @@ std::shared_ptr<octomap::OcTree> FCLInterface::convertOctomaptoOctree(const octo
 }
 
 
-FCLCollisionGeometryPtr FCLInterface::FilterObjectFromOctomap(const octomap_msgs::Octomap& map,shapes::ShapeMsg current_shape,const geometry_msgs::Pose &shapes_pose)
+FCLCollisionGeometryPtr FCLInterface::FilterObjectFromOctomap(const octomap_msgs::Octomap& map,
+                                                                shapes::ShapeMsg current_shape,
+                                                                const geometry_msgs::Pose &shapes_pose)
 {        
-
-        bodies::AABB bbox;
-        if (current_shape.which() == 0)
-        {
-            shape_msgs::SolidPrimitive s1=boost::get<shape_msgs::SolidPrimitive>(current_shape);  
-            bodies::Body *body =bodies::constructBodyFromMsg ( s1,shapes_pose);
-            
-            body->computeBoundingBox(bbox);        
-            std::cout<<"\n bbox.x() "<<bbox.min().x()<<","<<bbox.max().x()<<std::endl;
-            std::cout<<"bbox.y() "<<bbox.min().y()<<","<<bbox.max().y()<<std::endl;
-            std::cout<<"bbox.z() "<<bbox.min().z()<<","<<bbox.max().z()<<std::endl;                        
-        }
-        else if (current_shape.which() == 1)
-        {
-            shape_msgs::Mesh s1=boost::get<shape_msgs::Mesh>(current_shape);     
-            bodies::Body *body =bodies::constructBodyFromMsg ( s1,shapes_pose);
-            
-            body->computeBoundingBox(bbox);     
-            std::cout<<"MESH \n \n bbox.x()"<<bbox.min().x()<<","<<bbox.max().x()<<std::endl;
-            std::cout<<"bbox.y() "<<bbox.min().y()<<","<<bbox.max().y()<<std::endl;
-            std::cout<<"bbox.z() "<<bbox.min().z()<<","<<bbox.max().z()<<std::endl;  
-        }
-    std::cout<<"Created Octree "<<std::endl;
-    // https://github.com/OctoMap/octomap/issues/283
-    // http://docs.ros.org/en/api/octomap/html/test__iterators_8cpp.html#a757a73d2b6caa01e89e18dc44285f02f
-        std::shared_ptr<octomap::OcTree> om(static_cast<octomap::OcTree*>(octomap_msgs::msgToMap(map)));
     
-
-  
+    std::shared_ptr<octomap::OcTree> om=convertOctomaptoOctree(map);
     octomap::OcTreeKey minKey, maxKey;
+    double num_leaf_nodes=om->getNumLeafNodes();
+
+    bodies::AABB bbox;
+    if (current_shape.which() == 0)
+    {
+        shape_msgs::SolidPrimitive s1=boost::get<shape_msgs::SolidPrimitive>(current_shape);  
+        bodies::Body *body =bodies::constructBodyFromMsg ( s1,shapes_pose);
+        body->computeBoundingBox(bbox);                            
+    }
+    else if (current_shape.which() == 1)
+    {
+        shape_msgs::Mesh s1=boost::get<shape_msgs::Mesh>(current_shape);     
+        bodies::Body *body =bodies::constructBodyFromMsg ( s1,shapes_pose);
+        body->computeBoundingBox(bbox);     
+    }
+    else
+    {
+        ROS_WARN("Only supports MESH and SOLID Pimitives");
+        return createCollisionGeometry(om);
+    }
+    
     om->coordToKeyChecked(bbox.min().x(),bbox.min().y(),bbox.min().z(), minKey);  
     om->coordToKeyChecked(bbox.max().x(),bbox.max().y(),bbox.max().z(), maxKey);
 
-    std::cout<<"om->keyToCoord(minKey)"<<om->keyToCoord(minKey)<<std::endl;   
-    std::cout<<"om->keyToCoord(maxKey)"<<om->keyToCoord(maxKey)<<std::endl;   
-        
-    std::cout<<"om->calcNumNodes() = "<<om->getNumLeafNodes()<<std::endl;
-  
     std::vector<std::pair<octomap::OcTreeKey, unsigned int>> keys;
-    int i=0;
     for(octomap::OcTree::leaf_iterator it = om->begin_leafs(),
-         end=om->end_leafs(); it!= end; ++it)
+    end=om->end_leafs(); it!= end; ++it)
     {
-    //     // check if inside of bbx:
-    i++;
         octomap::OcTreeKey k = it.getKey();               
         if  (k[0] >= minKey[0] && k[1] >= minKey[1] && k[2] >= minKey[2]
-            && k[0] <= maxKey[0] && k[1] <= maxKey[1] && k[2] <= maxKey[2]){
-           keys.push_back(std::make_pair(k, it.getDepth())); // add to a stack
-         }
+        && k[0] <= maxKey[0] && k[1] <= maxKey[1] && k[2] <= maxKey[2]){
+            keys.push_back(std::make_pair(k, it.getDepth())); // add to a stack
+        }
     }
-    
-    std::cout<<"Number of keys in bounding box"<<keys.size()<<" of total"<<i<<std::endl;
-    // // delete all inside of box (in stack)
+    // // delete nodes which are in bounding box
     for(auto k:keys)
         om->deleteNode(k.first, k.second);
-    
-    std::cout<<"om->calcNumNodes() = "<<om->getNumLeafNodes()<<std::endl;
-    // ROS_DEBUG("Number of voxels removed outside local area: %i", keys.size() );
-  
-    // Not reall sure what to return here
+
+    std::cout<<"Filtered = "<<num_leaf_nodes-om->getNumLeafNodes()<<" of nodes"<<std::endl;
+
     return createCollisionGeometry(om);
 }
 
+
+FCLCollisionGeometryPtr FCLInterface::FilterObjectFromOctomap(const octomap_msgs::Octomap& map,
+                                                                const std::vector<shapes::ShapeMsg> &current_shapes,
+                                                                const std::vector<geometry_msgs::Pose> &shapes_poses)
+{        
+    
+    std::shared_ptr<octomap::OcTree> om=convertOctomaptoOctree(map);
+    octomap::OcTreeKey minKey, maxKey;
+    double num_leaf_nodes=om->getNumLeafNodes();
+    std::vector<std::pair<octomap::OcTreeKey, unsigned int>> keys;
+    
+    for (int var = 0; var < current_shapes.size(); ++var)
+    {
+        bodies::AABB bbox;
+        if (current_shapes[var].which() == 0)
+        {
+            shape_msgs::SolidPrimitive s1=boost::get<shape_msgs::SolidPrimitive>(current_shapes[var]);  
+            bodies::Body *body =bodies::constructBodyFromMsg ( s1,shapes_poses[var]);
+            body->computeBoundingBox(bbox);                            
+        }
+        else if (current_shapes[var].which() == 1)
+        {
+            shape_msgs::Mesh s1=boost::get<shape_msgs::Mesh>(current_shapes[var]);     
+            bodies::Body *body =bodies::constructBodyFromMsg ( s1,shapes_poses[var]);
+            body->computeBoundingBox(bbox);     
+        }
+        else
+        {
+            ROS_WARN("Only supports MESH and SOLID Pimitives");
+            return createCollisionGeometry(om);
+        }
+        
+        om->coordToKeyChecked(bbox.min().x(),bbox.min().y(),bbox.min().z(), minKey);  
+        om->coordToKeyChecked(bbox.max().x(),bbox.max().y(),bbox.max().z(), maxKey);
+
+        
+        for(octomap::OcTree::leaf_iterator it = om->begin_leafs(),
+        end=om->end_leafs(); it!= end; ++it)
+        {
+            octomap::OcTreeKey k = it.getKey();               
+            if  (k[0] >= minKey[0] && k[1] >= minKey[1] && k[2] >= minKey[2]
+                        && k[0] <= maxKey[0] && k[1] <= maxKey[1] && k[2] <= maxKey[2])
+            {
+                keys.push_back(std::make_pair(k, it.getDepth())); // add to a stack
+            }
+        }
+    }
+    // // delete nodes which are in bounding box
+    for(auto k:keys)
+        om->deleteNode(k.first, k.second);
+
+    std::cout<<"Removed = "<<om->getNumLeafNodes()-num_leaf_nodes<<" of nodes"<<std::endl;
+
+    return createCollisionGeometry(om);
+}
 
 FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry(const octomap_msgs::Octomap& map)
 {
