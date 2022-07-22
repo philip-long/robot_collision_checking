@@ -215,6 +215,23 @@ double FCLInterface::checkDistanceObjects ( const  FCLObject & object1,
 
 
 
+bool FCLInterface::checkCollisionObjects ( const shape_msgs::Mesh  & s1,
+        const  Eigen::Affine3d  & wT1,
+        const shape_msgs::SolidPrimitive  & s2,
+        const Eigen::Affine3d  & wT2
+                                         ) {
+    fcl::Transform3d wTf1,wTf2;
+    FCLCollisionGeometryPtr cg_1=createCollisionGeometry ( s1 );
+    FCLCollisionGeometryPtr cg_2=createCollisionGeometry ( s2 );
+    transform2fcl ( wT1,wTf1 );
+    transform2fcl ( wT2,wTf2 );
+    FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg_1,wTf1 );
+    FCLCollisionObjectPtr o2=std::make_shared<fcl::CollisionObjectd> ( cg_2,wTf2 );
+    fcl::CollisionRequestd col_req;
+    fcl::CollisionResultd col_result;
+    fcl::collide ( o1.get(), o2.get(), col_req, col_result );
+    return col_result.isCollision();
+}
 
 bool FCLInterface::checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s1,
         const  Eigen::Affine3d  & wT1,
@@ -226,15 +243,11 @@ bool FCLInterface::checkCollisionObjects ( const shape_msgs::SolidPrimitive  & s
     FCLCollisionGeometryPtr cg_2=createCollisionGeometry ( s2 );
     transform2fcl ( wT1,wTf1 );
     transform2fcl ( wT2,wTf2 );
-    //fcl::CollisionObjectd *o1=new fcl::CollisionObjectd ( cg_1,wTf1 );
-    //fcl::CollisionObjectd *o2=new fcl::CollisionObjectd ( cg_2,wTf2 );
     FCLCollisionObjectPtr o1=std::make_shared<fcl::CollisionObjectd> ( cg_1,wTf1 );
     FCLCollisionObjectPtr o2=std::make_shared<fcl::CollisionObjectd> ( cg_2,wTf2 );
     fcl::CollisionRequestd col_req;
     fcl::CollisionResultd col_result;
     fcl::collide ( o1.get(), o2.get(), col_req, col_result );
-//     delete o1;
-//     delete o2;
     return col_result.isCollision();
 }
 

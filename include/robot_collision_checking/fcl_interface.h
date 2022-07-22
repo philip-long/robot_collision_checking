@@ -29,6 +29,7 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <std_msgs/String.h>
 
+
 #ifndef FCL_INTERFACE_HPP
 #define FCL_INTERFACE_HPP
 
@@ -133,6 +134,14 @@ public:
     FCLCollisionGeometryPtr filterObjectFromOctomap(const octomap_msgs::Octomap& map,
                                                                 const std::vector<shapes::ShapeMsg> &current_shape,
                                                                 const std::vector<geometry_msgs::Pose> &shapes_pose);
+
+    FCLCollisionGeometryPtr filterObjectOctomapFCL(const octomap_msgs::Octomap& map,
+                                                                const std::vector<shapes::ShapeMsg> &current_shapes,
+                                                                const std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> &shapes_poses);
+
+    FCLCollisionGeometryPtr filterObjectOctomapFCL(const octomap_msgs::Octomap& map,
+                                                                const shapes::ShapeMsg &current_shapes,
+                                                                const Eigen::Affine3d &shapes_poses); 
 
     std::shared_ptr<octomap::OcTree> convertOctomaptoOctree(const octomap_msgs::Octomap& map);
 
@@ -309,6 +318,12 @@ public:
                                         const shape_msgs::SolidPrimitive  & s2,
                                         const Eigen::Affine3d  & wT2
                                       );
+  /// Returns true if mesh and solid primitives are in collision                                      
+    static bool checkCollisionObjects ( const shape_msgs::Mesh  & s1,
+                                        const  Eigen::Affine3d  & wT1,
+                                        const shape_msgs::SolidPrimitive  & s2,
+                                        const Eigen::Affine3d  & wT2);
+
     /// Returns true if two FCLObjects are in collision
     static bool checkCollisionObjects ( const FCLObject & object1,
                                         const FCLObject & object2

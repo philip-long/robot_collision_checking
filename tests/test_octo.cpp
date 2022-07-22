@@ -22,9 +22,9 @@ int main ( int argc, char **argv ) {
     std::cout<<"---------------------------------------------"<<std::endl;
     ROS_INFO ( "SIMPLE FCL INTERFACE" );
     std::cout<<"---------------------------------------------"<<std::endl;
-    Eigen::Vector3d e_wps1 ( 0.5,0.5,0.0 );
-    Eigen::Vector3d e_wps2 (0.5,0.0,1.0 );
-    Eigen::Vector3d e_wps3 ( 2.0,0.5,0.0 );
+    Eigen::Vector3d e_wps1 ( 0.5,0.5,0.05 );
+    Eigen::Vector3d e_wps2 (1.0,0.4,0.07 );
+    Eigen::Vector3d e_wps3 ( 0.2,0.8,0.0 );
     Eigen::Vector3d e_octo ( 0.0,0.0,0.0);
     Eigen::Matrix3d e_wRs1,e_wRs2,e_wRs3,e_wRsocto;
     Eigen::Affine3d e_wTs1,e_wTs2,e_wTs3,e_wTsocto;
@@ -51,11 +51,11 @@ int main ( int argc, char **argv ) {
     shape_msgs::SolidPrimitive sphere1,sphere2,box1;
 
     sphere1.dimensions.resize ( 1 );
-    sphere1.dimensions[shape_msgs::SolidPrimitive::SPHERE_RADIUS]=0.5;
+    sphere1.dimensions[shape_msgs::SolidPrimitive::SPHERE_RADIUS]=0.2;
     sphere1.type=shape_msgs::SolidPrimitive::SPHERE;
 
     sphere2.dimensions.resize ( 1 );
-    sphere2.dimensions[shape_msgs::SolidPrimitive::SPHERE_RADIUS]=0.1;
+    sphere2.dimensions[shape_msgs::SolidPrimitive::SPHERE_RADIUS]=0.2;
     sphere2.type=shape_msgs::SolidPrimitive::SPHERE;
 
     box1.dimensions.resize ( 3 );
@@ -95,13 +95,15 @@ int main ( int argc, char **argv ) {
             Octomap pre-filtering
 
     // =========================================================== */
+    ROS_INFO ( "\n \n \n PRE FILTERING \n \n \n" );    
     test_node.addCollisionObject ( octomap_,e_wTsocto,99 );
 
     ROS_INFO ( "Checking Distance & Collision sphere octomap" );    
     std::cout<<"Is sphere in collision"<<test_node.checkCollisionObjectWorld(sphere1,e_wTs1)<<std::endl;
     std::cout<<"Is box in collision"<<test_node.checkCollisionObjectWorld(box1,e_wTs2)<<std::endl;
     std::cout<<"Is sphere2 in collision"<<test_node.checkCollisionObjectWorld(sphere2,e_wTs3)<<std::endl;
-
+    p1w.clear();
+    p2w.clear();
 
     test_node.checkDistanceObjectWorld ( sphere1,e_wTs1,obj_ids,obj_distances,p1w,p2w );
     for ( unsigned int i=0; i<obj_distances.size(); i++ ) {
@@ -109,8 +111,8 @@ int main ( int argc, char **argv ) {
                 std::cout<<"Distance  "<<obj_distances[i]<<std::endl;
                 std::cout<<" Closest Points p1w = ["<<p1w[i] ( 0 ) <<", "<<p1w[i] ( 1 ) <<", "<<p1w[i] ( 2 ) <<"]"<<std::endl;
                 std::cout<<"                p2w = ["<<p2w[i] ( 0 ) <<", "<<p2w[i] ( 1 ) <<", "<<p2w[i] ( 2 ) <<"]"<<std::endl;
-                test_node.publishPoint ( p1w[i],"closest_point1",i,"world", {0.1,0.1,0.1}, {0.05,0.05,0.05} );
-                test_node.publishPoint ( p2w[i],"closest_point2",i,"world", {0.1,0.1,0.1}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p1w[i],"closest_point1",i,"world", {1.0,0.1,0.0}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p2w[i],"closest_point2",i,"world", {1.0,0.1,0.0}, {0.05,0.05,0.05} );
     }
     test_node.checkDistanceObjectWorld ( box1,e_wTs2,obj_ids,obj_distances,p1w,p2w );
     for ( unsigned int i=0; i<obj_distances.size(); i++ ) {
@@ -118,8 +120,8 @@ int main ( int argc, char **argv ) {
                 std::cout<<"Distance  "<<obj_distances[i]<<std::endl;
                 std::cout<<" Closest Points p1w = ["<<p1w[i] ( 0 ) <<", "<<p1w[i] ( 1 ) <<", "<<p1w[i] ( 2 ) <<"]"<<std::endl;
                 std::cout<<"                p2w = ["<<p2w[i] ( 0 ) <<", "<<p2w[i] ( 1 ) <<", "<<p2w[i] ( 2 ) <<"]"<<std::endl;
-                test_node.publishPoint ( p1w[i],"closest_point1_box",i,"world", {0.1,0.1,0.1}, {0.05,0.05,0.05} );
-                test_node.publishPoint ( p2w[i],"closest_point2_box",i,"world", {0.1,0.1,0.1}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p1w[i],"closest_point1_sphere",i,"world", {1.0,0.1,0.0}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p2w[i],"closest_point2_sphere",i,"world", {1.0,0.1,0.0}, {0.05,0.05,0.05} );
     }
 
     test_node.checkDistanceObjectWorld ( sphere2,e_wTs3,obj_ids,obj_distances,p1w,p2w );
@@ -128,16 +130,19 @@ int main ( int argc, char **argv ) {
                 std::cout<<"Distance  "<<obj_distances[i]<<std::endl;
                 std::cout<<" Closest Points p1w = ["<<p1w[i] ( 0 ) <<", "<<p1w[i] ( 1 ) <<", "<<p1w[i] ( 2 ) <<"]"<<std::endl;
                 std::cout<<"                p2w = ["<<p2w[i] ( 0 ) <<", "<<p2w[i] ( 1 ) <<", "<<p2w[i] ( 2 ) <<"]"<<std::endl;
-                test_node.publishPoint ( p1w[i],"closest_point1_box",i,"world", {0.1,0.1,0.1}, {0.05,0.05,0.05} );
-                test_node.publishPoint ( p2w[i],"closest_point2_box",i,"world", {0.1,0.1,0.1}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p1w[i],"closest_point1_box",i,"world", {1.0,0.1,0.0}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p2w[i],"closest_point2_box",i,"world", {1.0,0.1,0.0}, {0.05,0.05,0.05} );
     }
 
-
+    ros::Duration(1.0).sleep(); 
     /* =========================================================== //
 
             Octomap filtering
 
     // =========================================================== */
+
+    ROS_INFO ( "\n \n \n FILTERING 1 \n \n \n" );  
+
     geometry_msgs::Pose sphere_pose,box_pose,sphere2_pose;
     tf::poseEigenToMsg(e_wTs1, sphere_pose);
     tf::poseEigenToMsg(e_wTs2, box_pose);
@@ -158,7 +163,7 @@ int main ( int argc, char **argv ) {
     FCLCollisionGeometryPtr cg=test_node.filterObjectFromOctomap(octomap_,shapes,poses);
     ROS_INFO ( "Removing old Octomap from World" );
     test_node.removeCollisionObject(99);
-    ros::Duration(1.0).sleep();
+    ros::Duration(2.0).sleep();
     ROS_INFO ( "Adding new Octomap to World" );
     test_node.addCollisionObject ( cg,e_wTsocto,99 );
     
@@ -173,15 +178,16 @@ int main ( int argc, char **argv ) {
     std::cout<<"Is box in collision"<<test_node.checkCollisionObjectWorld(box1,e_wTs2)<<std::endl;
     std::cout<<"Is sphere2 in collision"<<test_node.checkCollisionObjectWorld(sphere2,e_wTs3)<<std::endl;
 
-
+    p1w.clear();
+    p2w.clear();
     test_node.checkDistanceObjectWorld ( sphere1,e_wTs1,obj_ids,obj_distances,p1w,p2w );
     for ( unsigned int i=0; i<obj_distances.size(); i++ ) {
                 std::cout<<"Obj id"<<obj_ids[i]<<std::endl;
                 std::cout<<"Distance  "<<obj_distances[i]<<std::endl;
                 std::cout<<" Closest Points p1w = ["<<p1w[i] ( 0 ) <<", "<<p1w[i] ( 1 ) <<", "<<p1w[i] ( 2 ) <<"]"<<std::endl;
                 std::cout<<"                p2w = ["<<p2w[i] ( 0 ) <<", "<<p2w[i] ( 1 ) <<", "<<p2w[i] ( 2 ) <<"]"<<std::endl;
-                test_node.publishPoint ( p1w[i],"closest_point1",i,"world", {0.1,0.1,0.1}, {0.05,0.05,0.05} );
-                test_node.publishPoint ( p2w[i],"closest_point2",i,"world", {0.1,0.1,0.1}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p1w[i],"closest_point1_oct1",i,"world", {0.3,1.0,0.3}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p2w[i],"closest_point2_oct1",i,"world", {0.3,1.0,0.3}, {0.05,0.05,0.05} );
     }
     test_node.checkDistanceObjectWorld ( box1,e_wTs2,obj_ids,obj_distances,p1w,p2w );
     for ( unsigned int i=0; i<obj_distances.size(); i++ ) {
@@ -189,10 +195,9 @@ int main ( int argc, char **argv ) {
                 std::cout<<"Distance  "<<obj_distances[i]<<std::endl;
                 std::cout<<" Closest Points p1w = ["<<p1w[i] ( 0 ) <<", "<<p1w[i] ( 1 ) <<", "<<p1w[i] ( 2 ) <<"]"<<std::endl;
                 std::cout<<"                p2w = ["<<p2w[i] ( 0 ) <<", "<<p2w[i] ( 1 ) <<", "<<p2w[i] ( 2 ) <<"]"<<std::endl;
-                test_node.publishPoint ( p1w[i],"closest_point1_box",i,"world", {0.1,0.1,0.1}, {0.05,0.05,0.05} );
-                test_node.publishPoint ( p2w[i],"closest_point2_box",i,"world", {0.1,0.1,0.1}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p1w[i],"closest_point1_sphere_oct1",i,"world", {0.3,1.0,0.3}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p2w[i],"closest_point2_sphere_oct1",i,"world", {0.3,1.0,0.3}, {0.05,0.05,0.05} );
     }
-
 
     test_node.checkDistanceObjectWorld ( sphere2,e_wTs3,obj_ids,obj_distances,p1w,p2w );
     for ( unsigned int i=0; i<obj_distances.size(); i++ ) {
@@ -200,9 +205,82 @@ int main ( int argc, char **argv ) {
                 std::cout<<"Distance  "<<obj_distances[i]<<std::endl;
                 std::cout<<" Closest Points p1w = ["<<p1w[i] ( 0 ) <<", "<<p1w[i] ( 1 ) <<", "<<p1w[i] ( 2 ) <<"]"<<std::endl;
                 std::cout<<"                p2w = ["<<p2w[i] ( 0 ) <<", "<<p2w[i] ( 1 ) <<", "<<p2w[i] ( 2 ) <<"]"<<std::endl;
-                test_node.publishPoint ( p1w[i],"closest_point1_box",i,"world", {0.1,0.1,0.1}, {0.05,0.05,0.05} );
-                test_node.publishPoint ( p2w[i],"closest_point2_box",i,"world", {0.1,0.1,0.1}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p1w[i],"closest_point1_box_oct1",i,"world", {0.3,1.0,0.3}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p2w[i],"closest_point2_box_oct1",i,"world", {0.3,1.0,0.3}, {0.05,0.05,0.05} );
     }
+
+    ros::Duration(2.0).sleep(); 
+
+
+
+    /* =========================================================== //
+
+            Octomap filtering 2
+
+    // =========================================================== */
+    ROS_INFO ( "\n \n \n FILTERING 2 \n \n \n" );  
+
+    std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> eigen_poses;
+    eigen_poses.push_back(e_wTs1);
+    eigen_poses.push_back(e_wTs2);
+    eigen_poses.push_back(e_wTs3);
+    
+    shapes.clear();
+    shapes.push_back(sphere1);
+    shapes.push_back(box1);
+    shapes.push_back(sphere2);
+
+    FCLCollisionGeometryPtr cg2=test_node.filterObjectOctomapFCL(octomap_,shapes,eigen_poses);
+    ROS_INFO ( "Removing old Octomap from World" );
+    test_node.removeCollisionObject(99);
+    ros::Duration(1.0).sleep();
+    ROS_INFO ( "Adding new Octomap to World" );
+    test_node.addCollisionObject ( cg2,e_wTsocto,99 );
+    
+    /* =========================================================== //
+
+            Octomap post-filtering
+
+    // =========================================================== */
+
+    ROS_INFO ( "Checking Distance & Collision sphere post filtering " );    
+    std::cout<<"Is sphere in collision"<<test_node.checkCollisionObjectWorld(sphere1,e_wTs1)<<std::endl;
+    std::cout<<"Is box in collision"<<test_node.checkCollisionObjectWorld(box1,e_wTs2)<<std::endl;
+    std::cout<<"Is sphere2 in collision"<<test_node.checkCollisionObjectWorld(sphere2,e_wTs3)<<std::endl;
+
+
+
+    test_node.checkDistanceObjectWorld ( sphere1,e_wTs1,obj_ids,obj_distances,p1w,p2w );
+    for ( unsigned int i=0; i<obj_distances.size(); i++ ) {
+                std::cout<<"Obj id"<<obj_ids[i]<<std::endl;
+                std::cout<<"Distance  "<<obj_distances[i]<<std::endl;
+                std::cout<<" Closest Points p1w = ["<<p1w[i] ( 0 ) <<", "<<p1w[i] ( 1 ) <<", "<<p1w[i] ( 2 ) <<"]"<<std::endl;
+                std::cout<<"                p2w = ["<<p2w[i] ( 0 ) <<", "<<p2w[i] ( 1 ) <<", "<<p2w[i] ( 2 ) <<"]"<<std::endl;
+                test_node.publishPoint ( p1w[i],"closest_point1_oct2",i,"world", {0.1,0.5,1.0}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p2w[i],"closest_point2_oct2",i,"world", {0.1,0.5,1.0}, {0.05,0.05,0.05} );
+    }
+    test_node.checkDistanceObjectWorld ( box1,e_wTs2,obj_ids,obj_distances,p1w,p2w );
+    for ( unsigned int i=0; i<obj_distances.size(); i++ ) {
+                std::cout<<"Obj id"<<obj_ids[i]<<std::endl;
+                std::cout<<"Distance  "<<obj_distances[i]<<std::endl;
+                std::cout<<" Closest Points p1w = ["<<p1w[i] ( 0 ) <<", "<<p1w[i] ( 1 ) <<", "<<p1w[i] ( 2 ) <<"]"<<std::endl;
+                std::cout<<"                p2w = ["<<p2w[i] ( 0 ) <<", "<<p2w[i] ( 1 ) <<", "<<p2w[i] ( 2 ) <<"]"<<std::endl;
+                test_node.publishPoint ( p1w[i],"closest_point1_sphere_oct2",i,"world", {0.1,0.5,1.0}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p2w[i],"closest_point2_sphere_oct2",i,"world", {0.1,0.5,1.0}, {0.05,0.05,0.05} );
+    }
+
+    test_node.checkDistanceObjectWorld ( sphere2,e_wTs3,obj_ids,obj_distances,p1w,p2w );
+    for ( unsigned int i=0; i<obj_distances.size(); i++ ) {
+                std::cout<<"Obj id"<<obj_ids[i]<<std::endl;
+                std::cout<<"Distance  "<<obj_distances[i]<<std::endl;
+                std::cout<<" Closest Points p1w = ["<<p1w[i] ( 0 ) <<", "<<p1w[i] ( 1 ) <<", "<<p1w[i] ( 2 ) <<"]"<<std::endl;
+                std::cout<<"                p2w = ["<<p2w[i] ( 0 ) <<", "<<p2w[i] ( 1 ) <<", "<<p2w[i] ( 2 ) <<"]"<<std::endl;
+                test_node.publishPoint ( p1w[i],"closest_point1_box_oct2",i,"world", {0.1,0.5,1.0}, {0.05,0.05,0.05} );
+                test_node.publishPoint ( p2w[i],"closest_point2_box_oct2",i,"world", {0.1,0.5,1.0}, {0.05,0.05,0.05} );
+    }
+
+    ros::Duration(2.0).sleep(); 
+
     return 0;
     
 
