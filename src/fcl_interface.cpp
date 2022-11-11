@@ -510,7 +510,7 @@ std::shared_ptr<octomap::OcTree> FCLInterface::convertOctomaptoOctree(const octo
 }
 
 FCLCollisionGeometryPtr FCLInterface::filterObjectFromOctomap(const octomap_msgs::Octomap &map,
-                                                              shapes::ShapeMsg current_shape,
+                                                              const shapes::ShapeMsg &current_shapes,
                                                               const geometry_msgs::Pose &shapes_pose)
 {
 
@@ -520,15 +520,15 @@ FCLCollisionGeometryPtr FCLInterface::filterObjectFromOctomap(const octomap_msgs
     std::cout << "num_leaf_nodes: " << num_leaf_nodes << std::endl;
 
     bodies::AABB bbox;
-    if (current_shape.which() == 0)
+    if (current_shapes.which() == 0)
     {
-        shape_msgs::SolidPrimitive s1 = boost::get<shape_msgs::SolidPrimitive>(current_shape);
+        shape_msgs::SolidPrimitive s1 = boost::get<shape_msgs::SolidPrimitive>(current_shapes);
         bodies::Body *body = bodies::constructBodyFromMsg(s1, shapes_pose);
         body->computeBoundingBox(bbox);
     }
-    else if (current_shape.which() == 1)
+    else if (current_shapes.which() == 1)
     {
-        shape_msgs::Mesh s1 = boost::get<shape_msgs::Mesh>(current_shape);
+        shape_msgs::Mesh s1 = boost::get<shape_msgs::Mesh>(current_shapes);
         bodies::Body *body = bodies::constructBodyFromMsg(s1, shapes_pose);
         body->computeBoundingBox(bbox);
     }
@@ -571,7 +571,7 @@ FCLCollisionGeometryPtr FCLInterface::filterObjectFromOctomap(const octomap_msgs
     octomap::OcTreeKey minKey, maxKey;
     double num_leaf_nodes = om->getNumLeafNodes();
 
-    std::cout << "num_leaf_nodes" << num_leaf_nodes << std::endl;
+    std::cout << "num_leaf_nodes: " << num_leaf_nodes << std::endl;
 
     std::vector<std::pair<octomap::OcTreeKey, unsigned int>> keys;
 
@@ -586,11 +586,29 @@ FCLCollisionGeometryPtr FCLInterface::filterObjectFromOctomap(const octomap_msgs
         }
         else if (current_shapes[var].which() == 1)
         {
-            ROS_WARN("This might cause a fault because of qhull dependeing on your install");
-            ROS_WARN("See issues CHOMP fails to plan #241 https://github.com/ros-planning/moveit_task_constructor/issues/241");
+            // ROS_WARN("This might cause a fault because of qhull depending on your install");
+            // ROS_WARN("See issues CHOMP fails to plan #241 https://github.com/ros-planning/moveit_task_constructor/issues/241");
 
             shape_msgs::Mesh s1 = boost::get<shape_msgs::Mesh>(current_shapes[var]);
-            bodies::Body *body = bodies::constructBodyFromMsg(s1, shapes_poses[var]);
+            shapes::ShapePtr shape(shapes::constructShapeFromMsg(s1));
+ 
+            bodies::Body* body = bodies::createEmptyBodyFromShapeType(shape->type);
+            geometry_msgs::Pose pose = shapes_poses[var];
+
+            Eigen::Quaterniond q(pose.orientation.w, pose.orientation.x, pose.orientation.y, pose.orientation.z);
+            if (fabs(q.squaredNorm() - 1.0) > 1e-3)
+            {
+                q = Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0);
+            }
+            Eigen::Isometry3d af(Eigen::Translation3d(pose.position.x, pose.position.y, pose.position.z) * q);
+            body->setPoseDirty(af);
+
+            // THIS LINE KILLS US
+            // https://docs.ros.org/en/melodic/api/geometric_shapes/html/bodies_8cpp_source.html#l00806
+            //body->setDimensionsDirty(shape.get());
+            
+            body->updateInternalData();
+
             body->computeBoundingBox(bbox);
         }
         else
@@ -666,7 +684,6 @@ FCLCollisionGeometryPtr FCLInterface::filterObjectOctomapFCL(const octomap_msgs:
             shape_msgs::Mesh s1 = boost::get<shape_msgs::Mesh>(current_shapes);
             if (checkCollisionObjects(s1, shapes_poses, sphere, e_wTs1))
             {
-                std::cout << "in collision" << std::endl;
                 keys.push_back(std::make_pair(k, it.getDepth())); // add to a stack
                 break;
             }
@@ -734,7 +751,6 @@ FCLCollisionGeometryPtr FCLInterface::filterObjectOctomapFCL(const octomap_msgs:
                 shape_msgs::Mesh s1 = boost::get<shape_msgs::Mesh>(current_shapes[var]);
                 if (checkCollisionObjects(s1, shapes_poses[var], sphere, e_wTs1))
                 {
-                    std::cout << "in collision" << std::endl;
                     keys.push_back(std::make_pair(k, it.getDepth())); // add to a stack
                     break;
                 }

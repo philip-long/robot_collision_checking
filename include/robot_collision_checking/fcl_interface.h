@@ -21,6 +21,7 @@
 #include <geometric_shapes/shape_to_marker.h>
 #include <geometric_shapes/bodies.h>
 #include <geometric_shapes/body_operations.h>
+#include <geometric_shapes/shape_operations.h>
 
 #include <octomap/octomap.h>
 #include <octomap/OcTreeKey.h>
@@ -124,7 +125,8 @@ public:
 
   /// Filter an object from octomap and return the filtered collision object
   FCLCollisionGeometryPtr filterObjectFromOctomap(const octomap_msgs::Octomap &map,
-                                                  shapes::ShapeMsg current_shape, const geometry_msgs::Pose &shapes_pose);
+                                                  const shapes::ShapeMsg &current_shapes,
+                                                  const geometry_msgs::Pose &shapes_pose);
 
   /// Filter multiple objects from octomap and return the filtered collision object
   FCLCollisionGeometryPtr filterObjectFromOctomap(const octomap_msgs::Octomap &map,
@@ -132,12 +134,12 @@ public:
                                                   const std::vector<geometry_msgs::Pose> &shapes_pose);
 
   FCLCollisionGeometryPtr filterObjectOctomapFCL(const octomap_msgs::Octomap &map,
-                                                 const std::vector<shapes::ShapeMsg> &current_shapes,
-                                                 const std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> &shapes_poses);
-
-  FCLCollisionGeometryPtr filterObjectOctomapFCL(const octomap_msgs::Octomap &map,
                                                  const shapes::ShapeMsg &current_shapes,
                                                  const Eigen::Affine3d &shapes_poses);
+
+  FCLCollisionGeometryPtr filterObjectOctomapFCL(const octomap_msgs::Octomap &map,
+                                                 const std::vector<shapes::ShapeMsg> &current_shapes,
+                                                 const std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d>> &shapes_poses);
 
   std::shared_ptr<octomap::OcTree> convertOctomaptoOctree(const octomap_msgs::Octomap &map);
 
