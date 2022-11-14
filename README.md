@@ -1,26 +1,32 @@
-# ROBOT_COLLISION_CHECKING
-A lightweight package to use FCL with a ros message (heavily inspired by moveit's but with FCL 5.0). 
-1. This package is for finding distances and collision between shape primitives described by ros_messages and eigen poses
-2. Collision checking & distance checking can be done by static functions or creating a class and maintaining a world
+# robot_collision_checking
 
+A lightweight package to use FCL with ROS messages (heavily inspired by [moveit's version](https://moveit.ros.org/documentation/concepts/developer_concepts/) but with FCL 5.0). 
 
-This package requires
+The package can be utilised for a couple of purposes:
+1. To find distances and collisions between shape primitives, as described by ROS messages and Eigen poses
+2. To perform distance and collision checking via static functions, or by creating a class and maintaining a world
 
+This package requires:
  * fcl > 6.0 [FCL](http://www.ros.org/wiki/fcl) 
  * [libccd](https://github.com/danfis/libccd) 
+ * [geometric_shapes](https://github.com/ros-planning/geometric_shapes/tree/591b7a0708c9cc1e42b5cdbbc306e99913ecffa8) at commit **#591b7a0**; 
  
-## Installing FCL & CCD
-The binaries FCL 5.0 should be already installed on ros kinetic, but we can't use them, likewise libccd-dev may already be installed but we need to reinstall from source.  Ensure this option is enabled, when compiling: 
+## Installation
+
+The binaries FCL 5.0 and `geometric_shapes` should be already installed on your ROS distro, but we cannot use them directly. Likewise, `libccd-dev` may already be installed but we need to reinstall from source. The following instructions will enable you to build the `robot_collision_checking` package within a catkin workspace using `catkin_make` or `catkin build`.
+
+### libccd
+
+Please ensure this option is enabled, when compiling: 
 >> -DENABLE_DOUBLE_PRECISION=ON
 
-### LIBCCD
 1. git clone https://github.com/danfis/libccd.git
 2. mkdir build && cd build
 3. cmake -G "Unix Makefiles" -DENABLE_DOUBLE_PRECISION=ON ..
 4. make
 5. sudo make install
 
-## FCL
+### FCL
 1. git clone https://github.com/flexible-collision-library/fcl.git
 2. mkdir build
 3. cd build
@@ -28,23 +34,22 @@ The binaries FCL 5.0 should be already installed on ros kinetic, but we can't us
 5. make
 6. sudo make install
 
-### finding
 The FindFCL.cmake should find the installed FCL (which overrides version 5.0).
 If there are errors suchs as constants not found probably it's still using the 
 older version of FCL. Lastly, none of the examples from FCL homepage will work as they now require a templating argument. 
 
-### Installation
-1. This package compiles with catkin build
+### geometric_shapes
 
+Please note that the reason for reverting to the #591b7a0 version of [geometric_shapes](https://github.com/ros-planning/geometric_shapes/tree/591b7a0708c9cc1e42b5cdbbc306e99913ecffa8) is due to the QHull error documented in [this issue thread](https://github.com/ros-planning/moveit_task_constructor/issues/241#issuecomment-793539263). Unfortunately, this may incur segfault errors, however our tests did not encounter these.
 
-## An finding distance and closest points from sphere to Octomap 
+To correctly run `robot_collision_checking` with the capability of checking distances and collisions against Octomap representations, please include [geometric_shapes](https://github.com/ros-planning/geometric_shapes/tree/591b7a0708c9cc1e42b5cdbbc306e99913ecffa8) locally in your catkin workspace and build from source.
+
+## Finding Distance & Closest Points to Octomap Representations 
 ```
 roslaunch robot_collision_checking ros_fcl_octomap_test.launch
 ```
 
-
-
-### Example using ros shape_msgs
+## Example using ros shape_msgs
 ```
     shape_msgs::SolidPrimitive sphere1,box1;
     sphere1.dimensions.resize ( 1 );
@@ -76,6 +81,3 @@ roslaunch robot_collision_checking ros_fcl_octomap_test.launch
     std::cout<<" Closest Points on sphere p1 = ["<<p1 ( 0 ) <<", "<<p1 ( 1 ) <<", "<<p1 ( 2 ) <<"]"<<std::endl;
     std::cout<<"                on box    p2 = ["<<p2 ( 0 ) <<", "<<p2 ( 1 ) <<", "<<p2 ( 2 ) <<"]"<<std::endl;
 ```
-
-
-

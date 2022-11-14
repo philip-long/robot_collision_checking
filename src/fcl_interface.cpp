@@ -590,25 +590,7 @@ FCLCollisionGeometryPtr FCLInterface::filterObjectFromOctomap(const octomap_msgs
             // ROS_WARN("See issues CHOMP fails to plan #241 https://github.com/ros-planning/moveit_task_constructor/issues/241");
 
             shape_msgs::Mesh s1 = boost::get<shape_msgs::Mesh>(current_shapes[var]);
-            shapes::ShapePtr shape(shapes::constructShapeFromMsg(s1));
- 
-            bodies::Body* body = bodies::createEmptyBodyFromShapeType(shape->type);
-            geometry_msgs::Pose pose = shapes_poses[var];
-
-            Eigen::Quaterniond q(pose.orientation.w, pose.orientation.x, pose.orientation.y, pose.orientation.z);
-            if (fabs(q.squaredNorm() - 1.0) > 1e-3)
-            {
-                q = Eigen::Quaterniond(1.0, 0.0, 0.0, 0.0);
-            }
-            Eigen::Isometry3d af(Eigen::Translation3d(pose.position.x, pose.position.y, pose.position.z) * q);
-            body->setPoseDirty(af);
-
-            // THIS LINE KILLS US
-            // https://docs.ros.org/en/melodic/api/geometric_shapes/html/bodies_8cpp_source.html#l00806
-            //body->setDimensionsDirty(shape.get());
-            
-            body->updateInternalData();
-
+            bodies::Body *body = bodies::constructBodyFromMsg(s1, shapes_poses[var]);
             body->computeBoundingBox(bbox);
         }
         else
