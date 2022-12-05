@@ -34,7 +34,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES fcl_interface
   CATKIN_DEPENDS roscpp rospy roslib std_msgs shape_msgs geometry_msgs geometric_shapes
-  DEPENDS EIGEN3 CCD FCL
+  DEPENDS Eigen3 CCD FCL
 )
 
 include(CheckCXXCompilerFlag)
@@ -51,44 +51,43 @@ endif()
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
+  ${Eigen3_INCLUDE_DIRS}
   ${FCL_INCLUDE_DIRS}
   ${CCD_INCLUDE_DIRS}
   ${OCTOMAP_INCLUDE_DIRS}
 )
 
 add_library(fcl_interface
-   src/fcl_interface.cpp
-   src/static_fcl_interface.cpp
-   include/${PROJECT_NAME}/fcl_interface.h
+  src/fcl_interface.cpp
+  src/static_fcl_interface.cpp
+  include/${PROJECT_NAME}/fcl_interface.h
 )
-add_executable(testing ./tests/test_file.cpp)
-add_executable(test_fcl_inter ./tests/test_fcl.cpp)
-add_executable(test_fcl_octo ./tests/test_octo.cpp)
-
-target_link_libraries(test_fcl_inter ${catkin_LIBRARIES} fcl_interface)
-target_link_libraries(test_fcl_octo ${catkin_LIBRARIES} fcl_interface)
-
-
-target_link_libraries(testing 
-                      ${catkin_LIBRARIES}
-                      ${FCL_LIBRARIES}
-                      ${CCD_LIBRARIES})
-target_link_libraries(test_fcl_inter
-                      ${catkin_LIBRARIES}
-                      ${FCL_LIBRARIES}
-                      ${CCD_LIBRARIES}
-                      ${OCTOMAP_LIBRARIES})
-
-target_link_libraries(test_fcl_octo
-                      ${catkin_LIBRARIES}
-                      ${FCL_LIBRARIES}
-                      ${CCD_LIBRARIES}
-                      ${OCTOMAP_LIBRARIES})
-                        
 add_dependencies(fcl_interface
-		  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-		  ${catkin_EXPORTED_TARGETS}
-		  #${FCL_LIBRARIES}
-		  ${CCD_LIBRARIES})
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+target_link_libraries(fcl_interface 
+  ${catkin_LIBRARIES}
+  ${Eigen3_LIBRARIES}
+  ${FCL_LIBRARIES}
+  ${CCD_LIBRARIES}
+  ${OCTOMAP_LIBRARIES}
+)
+
+add_executable(test_file tests/test_file.cpp)
+add_dependencies(test_file ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_file 
+  fcl_interface
+)
+
+add_executable(test_inter_fcl tests/test_inter_fcl.cpp)
+add_dependencies(test_inter_fcl ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_inter_fcl 
+  fcl_interface
+)
+
+add_executable(test_octo_fcl tests/test_octo_fcl.cpp)
+add_dependencies(test_octo_fcl ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_octo_fcl 
+  fcl_interface
+)                  

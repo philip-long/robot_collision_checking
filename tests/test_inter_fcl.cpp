@@ -3,8 +3,8 @@
 int main(int argc, char **argv)
 {
     std::cout << "hello" << std::endl;
-    ros::init(argc, argv, "robust"); // ros init
-    ros::NodeHandle nh;              // Create a node handle and start the node
+    ros::init(argc, argv, "test_fcl"); // ros init
+    ros::NodeHandle nh;                // Create a node handle and start the node
     ROS_INFO(" RUNNING TEST FCL");
 
     ROS_INFO("SIMPLE FCL INTERFACE");
@@ -35,11 +35,11 @@ int main(int argc, char **argv)
 
     fcl::Transform3d wTs1, wTs2, wTs3, wTs4, wTs5; //(wRs1,wps1);
 
-    FCLInterface::transform2fcl(e_wTs1, wTs1);
-    FCLInterface::transform2fcl(e_wTs2, wTs2);
-    FCLInterface::transform2fcl(e_wTs3, wTs3);
-    FCLInterface::transform2fcl(e_wTs4, wTs4);
-    FCLInterface::transform2fcl(e_wTs5, wTs5);
+    robot_collision_checking::FCLInterface::transform2fcl(e_wTs1, wTs1);
+    robot_collision_checking::FCLInterface::transform2fcl(e_wTs2, wTs2);
+    robot_collision_checking::FCLInterface::transform2fcl(e_wTs3, wTs3);
+    robot_collision_checking::FCLInterface::transform2fcl(e_wTs4, wTs4);
+    robot_collision_checking::FCLInterface::transform2fcl(e_wTs5, wTs5);
 
     std::shared_ptr<fcl::CollisionGeometryd> cg_1 = std::make_shared<fcl::Sphered>(0.3);
     std::shared_ptr<fcl::CollisionGeometryd> cg_2 = std::make_shared<fcl::Sphered>(0.75);
@@ -124,22 +124,22 @@ int main(int argc, char **argv)
 
     Eigen::Vector3d p1, p2;
     double distance;
-    distance = FCLInterface::checkDistanceObjects(sphere1, e_wTs1, sphere2, e_wTs2, p1, p2);
+    distance = robot_collision_checking::FCLInterface::checkDistanceObjects(sphere1, e_wTs1, sphere2, e_wTs2, p1, p2);
     std::cout << " sphere1 & sphere2  distance = " << distance << std::endl;
     std::cout << " Closest Points p1 = [" << p1(0) << ", " << p1(1) << ", " << p1(2) << "]" << std::endl;
     std::cout << "                p2 = [" << p2(0) << ", " << p2(1) << ", " << p2(2) << "]" << std::endl;
 
-    distance = FCLInterface::checkDistanceObjects(sphere1, e_wTs1, box1, e_wTs3, p1, p2);
+    distance = robot_collision_checking::FCLInterface::checkDistanceObjects(sphere1, e_wTs1, box1, e_wTs3, p1, p2);
     std::cout << " sphere1 & box1  distance = " << distance << std::endl;
     std::cout << " Closest Points p1 = [" << p1(0) << ", " << p1(1) << ", " << p1(2) << "]" << std::endl;
     std::cout << "                p2 = [" << p2(0) << ", " << p2(1) << ", " << p2(2) << "]" << std::endl;
 
-    distance = FCLInterface::checkDistanceObjects(sphere1, e_wTs1, cylinder1, e_wTs4, p1, p2);
+    distance = robot_collision_checking::FCLInterface::checkDistanceObjects(sphere1, e_wTs1, cylinder1, e_wTs4, p1, p2);
     std::cout << " sphere1 & cylinder1  distance = " << distance << std::endl;
     std::cout << " Closest Points p1 = [" << p1(0) << ", " << p1(1) << ", " << p1(2) << "]" << std::endl;
     std::cout << "                p2 = [" << p2(0) << ", " << p2(1) << ", " << p2(2) << "]" << std::endl;
 
-    distance = FCLInterface::checkDistanceObjects(sphere1, e_wTs1, box2, e_wTs5, p1, p2);
+    distance = robot_collision_checking::FCLInterface::checkDistanceObjects(sphere1, e_wTs1, box2, e_wTs5, p1, p2);
     std::cout << " sphere1 & box2  distance = " << distance << std::endl;
     std::cout << " Closest Points p1 = [" << p1(0) << ", " << p1(1) << ", " << p1(2) << "]" << std::endl;
     std::cout << "                p2 = [" << p2(0) << ", " << p2(1) << ", " << p2(2) << "]" << std::endl;
@@ -147,7 +147,7 @@ int main(int argc, char **argv)
     ROS_INFO("DYNAMIC functions");
     std::cout << "---------------------------------------------" << std::endl;
 
-    FCLInterface test_node(nh);
+    robot_collision_checking::FCLInterface test_node(nh);
     std::cout << " ===================== " << std::endl;
     test_node.addCollisionObject(sphere2, e_wTs2, 0);
     test_node.addCollisionObject(box1, e_wTs3, 1);
@@ -171,7 +171,7 @@ int main(int argc, char **argv)
 
     test_node.publishPoint(e_wTs1.translation(), "object", 100, "world", {1.0, 0.0, 0.0}, {0.6, 0.6, 0.6});
 
-    FCLObjectSet objects;
+    robot_collision_checking::FCLObjectSet objects;
     objects.resize(5);
     objects[0].object_shape = sphere1;
     objects[0].object_transform = e_wTs1;
@@ -185,7 +185,7 @@ int main(int argc, char **argv)
     objects[4].object_transform = e_wTs5;
 
     double distance_objs;
-    distance_objs = FCLInterface::checkDistanceObjects(objects[0], objects[1], p1, p2);
+    distance_objs = robot_collision_checking::FCLInterface::checkDistanceObjects(objects[0], objects[1], p1, p2);
     std::cout << " sphere1 & sphere2  distance = " << distance << std::endl;
     std::cout << " Closest Points p1 = [" << p1(0) << ", " << p1(1) << ", " << p1(2) << "]" << std::endl;
     std::cout << "                p2 = [" << p2(0) << ", " << p2(1) << ", " << p2(2) << "]" << std::endl;

@@ -13,8 +13,8 @@ void octoCallback(const octomap_msgs::Octomap::ConstPtr &msg)
 
 int main(int argc, char **argv)
 {
-        ros::init(argc, argv, "octomap_test_fcl"); // ros init
-        ros::NodeHandle nh;                        // Create a node handle and start the node
+        ros::init(argc, argv, "test_octo_fcl"); // ros init
+        ros::NodeHandle nh;                     // Create a node handle and start the node
         ros::Subscriber octo_sub = nh.subscribe("/octomap_full",
                                                 1, &octoCallback);
 
@@ -61,7 +61,7 @@ int main(int argc, char **argv)
         box1.dimensions[shape_msgs::SolidPrimitive::BOX_Y] = 0.1;
         box1.dimensions[shape_msgs::SolidPrimitive::BOX_Z] = 0.5;
 
-        FCLInterface test_node(nh);
+        robot_collision_checking::FCLInterface test_node(nh);
         ROS_INFO("Waiting a few seconds for RVIZ to start up");
         ros::Duration(2.0).sleep();
         test_node.addCollisionObject(sphere1, e_wTs1, 0);

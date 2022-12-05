@@ -1,18 +1,15 @@
 <launch>
-       
-<node name="create_cloud_xyzrgb" pkg="robot_collision_checking" type="create_cloud_xyzrgb.py"/>
-   
- <include file="$(find octomap_server)/launch/octomap_tracking_server.launch" />
- 
-   <node pkg="tf"
-        type="static_transform_publisher"
-        name="link1_broadcaster"
-        args="0 0 0 0 0 0 world map 100" /> 
- 
- 
- <node name="test_fcl_octo" pkg="robot_collision_checking" type="test_fcl_octo" output="screen"/>
- 
-  <node name="rviz" pkg="rviz" type="rviz"/>
- 
-</launch>
+  <node name="create_cloud_xyzrgb" pkg="robot_collision_checking" type="create_cloud_xyzrgb.py" />
 
+  <include file="$(find octomap_server)/launch/octomap_tracking_server.launch" />
+
+  <node pkg="tf"
+    type="static_transform_publisher"
+    name="link1_broadcaster"
+    args="0 0 0 0 0 0 world map 100" />
+
+
+  <node name="test_octo_fcl" pkg="robot_collision_checking" type="test_octo_fcl" output="screen" />
+
+  <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_collision_checking)/rviz/fcl_test.rviz" />
+</launch>
