@@ -85,9 +85,3 @@ add_dependencies(test_inter_fcl ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXP
 target_link_libraries(test_inter_fcl 
   fcl_interface
 )
-
-add_executable(test_octo_fcl tests/test_octo_fcl.cpp)
-add_dependencies(test_octo_fcl ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-target_link_libraries(test_octo_fcl 
-  fcl_interface
-)                  

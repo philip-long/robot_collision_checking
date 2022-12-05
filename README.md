@@ -3,7 +3,7 @@
 A lightweight package to use FCL with ROS messages (heavily inspired by [moveit's version](https://moveit.ros.org/documentation/concepts/developer_concepts/) but with FCL 5.0). 
 
 The package can be utilised for a couple of purposes:
-1. To find distances and collisions between shape primitives, as described by ROS messages and Eigen poses
+1. To find distances and collisions between shape primitives or Octomap representations, as described by ROS messages and Eigen poses
 2. To perform distance and collision checking via static functions, or by creating a class and maintaining a world
 
 This package requires:
@@ -43,11 +43,6 @@ older version of FCL. Lastly, none of the examples from FCL homepage will work a
 Please note that the reason for reverting to the #591b7a0 version of [geometric_shapes](https://github.com/ros-planning/geometric_shapes/tree/591b7a0708c9cc1e42b5cdbbc306e99913ecffa8) is due to the QHull error documented in [this issue thread](https://github.com/ros-planning/moveit_task_constructor/issues/241#issuecomment-793539263). Unfortunately, this may incur segfault errors, however our tests did not encounter these.
 
 To correctly run `robot_collision_checking` with the capability of checking distances and collisions against Octomap representations, please include [geometric_shapes](https://github.com/ros-planning/geometric_shapes/tree/591b7a0708c9cc1e42b5cdbbc306e99913ecffa8) locally in your catkin workspace and build from source.
-
-## Finding Distance & Closest Points to Octomap Representations 
-```
-roslaunch robot_collision_checking ros_fcl_octomap_test.launch
-```
 
 ## Example using ros shape_msgs
 ```

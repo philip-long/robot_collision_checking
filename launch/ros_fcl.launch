@@ -1,8 +1,0 @@
-<launch>
-    <node name="test_inter_fcl"
-        pkg="robot_collision_checking"
-        type="test_inter_fcl"
-        respawn="false" output="screen" clear_params="true"></node>
-
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find robot_collision_checking)/rviz/fcl_test.rviz" />
-</launch>
