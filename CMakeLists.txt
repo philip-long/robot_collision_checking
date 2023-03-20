@@ -1,14 +1,7 @@
 cmake_minimum_required(VERSION 3.1)
 project(robot_collision_checking)
 
-
 set(CMAKE_CXX_STANDARD 14)
-
-set(MSG_DEPS
-  std_msgs
-  shape_msgs
-  geometry_msgs
-)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -17,8 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions
   geometric_shapes
   octomap_msgs
-  )
-
+)
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
 
@@ -27,7 +19,7 @@ find_package(Eigen3 REQUIRED)
 find_package(octomap REQUIRED)
 
 if(EXISTS "${CMAKE_SOURCE_DIR}/cmake/FindFCL.cmake")
-find_package(FCL REQUIRED)
+  find_package(FCL REQUIRED)
 else()
   set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/${PROJECT_NAME}/cmake/")
   find_package(FCL REQUIRED)
@@ -35,23 +27,15 @@ endif()
 
 find_library(EIGEN_CDDLIB_LIB eigen-cddlib)
 
-
-
-
 ###########
 ## Build ##
 ###########
 catkin_package(
-   INCLUDE_DIRS include
-   LIBRARIES fcl_interface
-   CATKIN_DEPENDS roscpp rospy roslib   ${MSG_DEPS}  geometric_shapes
-   DEPENDS
-  EIGEN3
-  CCD
-  FCL
+  INCLUDE_DIRS include
+  LIBRARIES fcl_interface
+  CATKIN_DEPENDS roscpp rospy roslib std_msgs shape_msgs geometry_msgs geometric_shapes
+  DEPENDS Eigen3 CCD FCL
 )
-
-
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -66,51 +50,38 @@ endif()
 
 include_directories(
   include
-  /usr/include/eigen3/
   ${catkin_INCLUDE_DIRS}
-  ${Eigen_INCLUDE_DIRS}
-  ${PCL_INCLUDE_DIRS}
-  ${PCL_LIBRARY_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  ${EIGEN3_INCLUDE_DIRS}
+  ${Eigen3_INCLUDE_DIRS}
   ${FCL_INCLUDE_DIRS}
   ${CCD_INCLUDE_DIRS}
   ${OCTOMAP_INCLUDE_DIRS}
 )
 
-add_definitions(${PCL_DEFINITIONS})
-
 add_library(fcl_interface
-   src/fcl_interface.cpp
-   src/static_fcl_interface.cpp
-   include/${PROJECT_NAME}/fcl_interface.h
+  src/fcl_interface.cpp
+  src/static_fcl_interface.cpp
+  include/${PROJECT_NAME}/fcl_interface.h
 )
-add_executable(testing ./tests/test_file.cpp)
-add_executable(test_fcl_inter ./tests/test_fcl.cpp)
-add_executable(test_fcl_octo ./tests/test_octo.cpp)
-
-target_link_libraries(test_fcl_inter ${catkin_LIBRARIES} fcl_interface)
-target_link_libraries(test_fcl_octo ${catkin_LIBRARIES} fcl_interface)
-
-
-
-target_link_libraries(testing ${catkin_LIBRARIES}
-                      ${FCL_LIBRARIES}
-                       ${CCD_LIBRARIES})
-target_link_libraries(test_fcl_inter
-                        ${catkin_LIBRARIES}
-                        ${FCL_LIBRARIES}
-                        ${CCD_LIBRARIES}
-                        ${OCTOMAP_LIBRARIES})
-
-target_link_libraries(test_fcl_octo
-                        ${catkin_LIBRARIES}
-                        ${FCL_LIBRARIES}
-                        ${CCD_LIBRARIES}
-                        ${OCTOMAP_LIBRARIES})
-                        
 add_dependencies(fcl_interface
-		  ${${PROJECT_NAME}_EXPORTED_TARGETS}
-		  ${catkin_EXPORTED_TARGETS}
-		  #${FCL_LIBRARIES}
-		  ${CCD_LIBRARIES})
+  ${${PROJECT_NAME}_EXPORTED_TARGETS}
+  ${catkin_EXPORTED_TARGETS}
+)
+target_link_libraries(fcl_interface 
+  ${catkin_LIBRARIES}
+  ${Eigen3_LIBRARIES}
+  ${FCL_LIBRARIES}
+  ${CCD_LIBRARIES}
+  ${OCTOMAP_LIBRARIES}
+)
+
+add_executable(test_file tests/test_file.cpp)
+add_dependencies(test_file ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_file 
+  fcl_interface
+)
+
+add_executable(test_inter_fcl tests/test_inter_fcl.cpp)
+add_dependencies(test_inter_fcl ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(test_inter_fcl 
+  fcl_interface
+)
