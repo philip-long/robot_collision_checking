@@ -8,7 +8,7 @@
 /// on both objects.
 ///
 ///
-/// \author Philip Long <philip.long01@gmail.com>, RiVER Lab Northeastern University
+/// \author Philip Long <philip.long01@gmail.com>, RIVeR Lab Northeastern University
 /// \date Mar, 2019
 
 #ifndef FCL_INTERFACE_HPP
@@ -26,7 +26,6 @@
 
 #include <octomap/octomap.h>
 #include <octomap/OcTreeKey.h>
-#include <octomap_msgs/conversions.h>
 
 #include <ros/ros.h>
 
@@ -34,7 +33,8 @@
 #include <shape_msgs/SolidPrimitive.h>
 #include <shape_msgs/Plane.h>
 #include <shape_msgs/Mesh.h>
-#include <geometry_msgs/Pose.h>
+#include <octomap_msgs/conversions.h>
+#include <costmap_2d/VoxelGrid.h>
 
 typedef std::shared_ptr<fcl::CollisionObjectd> FCLCollisionObjectPtr;
 typedef std::shared_ptr<fcl::CollisionGeometryd> FCLCollisionGeometryPtr;
@@ -44,6 +44,7 @@ typedef std::shared_ptr<fcl::CollisionGeometryd> FCLCollisionGeometryPtr;
 
 const int PLANE = 10;
 const int OCTOMAP_INT = 20;
+const int VOXEL_GRID_INT = 30;
 
 #endif
 
@@ -123,9 +124,15 @@ namespace robot_collision_checking
       bool addCollisionObject(const octomap_msgs::Octomap &map,
                               const Eigen::Affine3d &wT1,
                               unsigned int object_id);
+      // Add a voxel grid to the world
+      bool addCollisionObject(const costmap_2d::VoxelGrid &grid,
+                              const Eigen::Affine3d &wT1,
+                              unsigned int object_id);
 
       /// Delete a collision object with object id
       bool removeCollisionObject(unsigned int object_id);
+      /// Delete a voxel grid object with object id
+      bool removeVoxelGridObject(unsigned int object_id);
       /// Display a marker defined by its ROS msgs in rviz
       bool displayMarker(shape_msgs::SolidPrimitive s1, const Eigen::Affine3d &T,
                         unsigned int obj_id, Eigen::Vector4d color);
@@ -145,7 +152,7 @@ namespace robot_collision_checking
       /// Check the collision between a mesh and the known world. Return true if in collision
       bool checkCollisionObjectWorld(const shape_msgs::Mesh &s1,
                                     const Eigen::Affine3d &wT1);
-      // Check the collision between a primitives and the known world. Return true if in collision, also returns a list of colliding objects
+      // Check the collision between a primitive and the known world. Return true if in collision, also returns a list of colliding objects
       bool checkCollisionObjectWorld(const shape_msgs::SolidPrimitive &s1,
                                     const Eigen::Affine3d &wT1,
                                     std::vector<unsigned int> &id_collision_objects);
@@ -187,9 +194,9 @@ namespace robot_collision_checking
       static FCLCollisionGeometryPtr createCollisionGeometry(const shape_msgs::Plane &s1);
       /// Create a collision fcl geometry from a ros msgs
       static FCLCollisionGeometryPtr createCollisionGeometry(const shape_msgs::Mesh &s1);
-      /// Create a collision fcl geometry from a octree
+      /// Create a collision fcl geometry from an octree
       static FCLCollisionGeometryPtr createCollisionGeometry(const octomap_msgs::Octomap &map);
-      /// Create a collision fcl geometry from a octree
+      /// Create a collision fcl geometry from an octree
       static FCLCollisionGeometryPtr createCollisionGeometry(const std::shared_ptr<const octomap::OcTree> &tree);
 
       // Returns the distance between two solid primitives

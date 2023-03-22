@@ -1,13 +1,13 @@
-# robot_collision_checking
+# Robot Collision Checking
 
-A lightweight package to use FCL with ROS messages (heavily inspired by [moveit's version](https://moveit.ros.org/documentation/concepts/developer_concepts/) but with FCL 5.0). 
+A lightweight package to use FCL with ROS messages (heavily inspired by [MoveIt's version](https://moveit.ros.org/documentation/concepts/developer_concepts/) but with FCL 5.0). 
 
 The package can be utilised for a couple of purposes:
-1. To find distances and collisions between shape primitives or Octomap representations, as described by ROS messages and Eigen poses
-2. To perform distance and collision checking via static functions, or by creating a class and maintaining a world
+1. To find distances and collisions between shape primitives, as described by ROS messages and Eigen poses.
+2. To perform distance and collision checking via static functions, or by creating a class and maintaining a world. The world can be represented using shape primitives, [Octomaps](http://docs.ros.org/en/noetic/api/octomap_msgs/html/msg/Octomap.html) and [VoxelGrids](http://docs.ros.org/en/noetic/api/costmap_2d/html/msg/VoxelGrid.html).
 
 This package requires:
- * fcl > 6.0 [FCL](http://www.ros.org/wiki/fcl) 
+ * [FCL](http://www.ros.org/wiki/fcl) > 6.0
  * [libccd](https://github.com/danfis/libccd) 
  * [geometric_shapes](https://github.com/ros-planning/geometric_shapes/tree/591b7a0708c9cc1e42b5cdbbc306e99913ecffa8) at commit **#591b7a0**; 
  
@@ -44,7 +44,7 @@ Please note that the reason for reverting to the #591b7a0 version of [geometric_
 
 To correctly run `robot_collision_checking` with the capability of checking distances and collisions against Octomap representations, please include [geometric_shapes](https://github.com/ros-planning/geometric_shapes/tree/591b7a0708c9cc1e42b5cdbbc306e99913ecffa8) locally in your catkin workspace and build from source.
 
-## Example using ros shape_msgs
+## Example using ROS shape_msgs
 ```
     shape_msgs::SolidPrimitive sphere1,box1;
     sphere1.dimensions.resize ( 1 );

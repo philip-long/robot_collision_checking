@@ -10,6 +10,7 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions
   geometric_shapes
   octomap_msgs
+  costmap_2d
 )
 
 set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/")
@@ -33,7 +34,7 @@ find_library(EIGEN_CDDLIB_LIB eigen-cddlib)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES fcl_interface
-  CATKIN_DEPENDS roscpp rospy roslib std_msgs shape_msgs geometry_msgs geometric_shapes
+  CATKIN_DEPENDS roscpp rospy roslib std_msgs shape_msgs geometry_msgs geometric_shapes octomap_msgs costmap_2d
   DEPENDS Eigen3 CCD FCL
 )
 

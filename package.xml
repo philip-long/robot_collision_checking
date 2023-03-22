@@ -54,6 +54,7 @@
   <depend>roscpp</depend>
   <depend>rospy</depend>
   <depend>octomap_msgs</depend>
+  <depend>costmap_2d</depend>
   <depend>roslib</depend>
   <depend>std_msgs</depend>
   <depend>libfcl-dev</depend>

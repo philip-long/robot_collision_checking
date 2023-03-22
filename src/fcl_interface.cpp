@@ -1,3 +1,5 @@
+#include <voxel_grid/voxel_grid.h>
+
 #include <robot_collision_checking/fcl_interface.h>
 
 namespace robot_collision_checking
@@ -14,7 +16,7 @@ namespace robot_collision_checking
     }
 
     bool FCLInterface::checkCollisionObjectWorld(const shape_msgs::SolidPrimitive &s1,
-                                                const Eigen::Affine3d &wT1)
+                                                 const Eigen::Affine3d &wT1)
     {
         FCLCollisionGeometryPtr cg = FCLInterface::createCollisionGeometry(s1);
         fcl::Transform3d wTf1;
@@ -25,12 +27,13 @@ namespace robot_collision_checking
         fcl::CollisionRequestd col_req;
         fcl::CollisionResultd col_result;
 
-        for (unsigned int i = 0; i < fcl_collision_world.size(); i++)
+        unsigned int world_size = fcl_collision_world.size();
+        for (unsigned int i = 0; i < world_size; i++)
         {
             fcl::collide(o1.get(),
-                        fcl_collision_world[i]->collision_object.get(),
-                        col_req,
-                        col_result);
+                         fcl_collision_world[i]->collision_object.get(),
+                         col_req,
+                         col_result);
             if (col_result.isCollision())
             {
                 return true;
@@ -40,7 +43,7 @@ namespace robot_collision_checking
     }
 
     bool FCLInterface::checkCollisionObjectWorld(const shape_msgs::Mesh &s1,
-                                                const Eigen::Affine3d &wT1)
+                                                 const Eigen::Affine3d &wT1)
     {
         FCLCollisionGeometryPtr cg = FCLInterface::createCollisionGeometry(s1);
         fcl::Transform3d wTf1;
@@ -51,12 +54,13 @@ namespace robot_collision_checking
         fcl::CollisionRequestd col_req;
         fcl::CollisionResultd col_result;
 
-        for (unsigned int i = 0; i < fcl_collision_world.size(); i++)
+        unsigned int world_size = fcl_collision_world.size();
+        for (unsigned int i = 0; i < world_size; i++)
         {
             fcl::collide(o1.get(),
-                        fcl_collision_world[i]->collision_object.get(),
-                        col_req,
-                        col_result);
+                         fcl_collision_world[i]->collision_object.get(),
+                         col_req,
+                         col_result);
             if (col_result.isCollision())
             {
                 return true;
@@ -66,8 +70,8 @@ namespace robot_collision_checking
     }
 
     bool FCLInterface::checkCollisionObjectWorld(const shape_msgs::SolidPrimitive &s1,
-                                                const Eigen::Affine3d &wT1,
-                                                std::vector<unsigned int> &id_collision_objects)
+                                                 const Eigen::Affine3d &wT1,
+                                                 std::vector<unsigned int> &id_collision_objects)
     {
         id_collision_objects.clear();
         FCLCollisionGeometryPtr cg = FCLInterface::createCollisionGeometry(s1);
@@ -79,12 +83,13 @@ namespace robot_collision_checking
         fcl::CollisionRequestd col_req;
         fcl::CollisionResultd col_result;
         bool in_collision(false);
-        for (unsigned int i = 0; i < fcl_collision_world.size(); i++)
+        unsigned int world_size = fcl_collision_world.size();
+        for (unsigned int i = 0; i < world_size; i++)
         {
             fcl::collide(o1.get(),
-                        fcl_collision_world[i]->collision_object.get(),
-                        col_req,
-                        col_result);
+                         fcl_collision_world[i]->collision_object.get(),
+                         col_req,
+                         col_result);
             if (col_result.isCollision())
             {
                 id_collision_objects.push_back(fcl_collision_world[i]->collision_id);
@@ -100,22 +105,22 @@ namespace robot_collision_checking
                                                 std::vector<Eigen::Vector3d> &wP1,
                                                 std::vector<Eigen::Vector3d> &wPobjs)
     {
-        for (unsigned int i = 0; i < fcl_collision_world.size(); i++)
+        unsigned int world_size = fcl_collision_world.size();
+        for (unsigned int i = 0; i < world_size; i++)
         {
-            fcl::DistanceRequestd dist_req;
-            dist_req.enable_nearest_points = true;
-            fcl::DistanceResultd dist_result;
             id_collision_objects[i] = fcl_collision_world[i]->collision_id;
-            FCLCollisionObjectPtr p;
-            dist_result.nearest_points[0].setZero();
-            dist_result.nearest_points[1].setZero();
+            fcl::DistanceRequestd dist_req;
             dist_req.enable_nearest_points = true;
             dist_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
 
+            fcl::DistanceResultd dist_result;
+            dist_result.nearest_points[0].setZero();
+            dist_result.nearest_points[1].setZero();
+
             fcl::distance(o1.get(),
-                        fcl_collision_world[i]->collision_object.get(),
-                        dist_req,
-                        dist_result);
+                          fcl_collision_world[i]->collision_object.get(),
+                          dist_req,
+                          dist_result);
 
             for (int j = 0; j < 3; j++)
             {
@@ -124,6 +129,7 @@ namespace robot_collision_checking
             }
             objs_distance[i] = dist_result.min_distance;
         }
+
         return true;
     }
 
@@ -134,15 +140,15 @@ namespace robot_collision_checking
                                                 std::vector<Eigen::Vector3d> &wP1,
                                                 std::vector<Eigen::Vector3d> &wPobjs)
     {
-
+        unsigned int world_size = fcl_collision_world.size();
         id_collision_objects.clear();
-        id_collision_objects.resize(fcl_collision_world.size());
+        id_collision_objects.resize(world_size);
         wP1.clear();
-        wP1.resize(fcl_collision_world.size());
+        wP1.resize(world_size);
         wPobjs.clear();
-        wPobjs.resize(fcl_collision_world.size());
+        wPobjs.resize(world_size);
         objs_distance.clear();
-        objs_distance.resize(fcl_collision_world.size());
+        objs_distance.resize(world_size);
 
         FCLCollisionGeometryPtr cg = FCLInterface::createCollisionGeometry(s1);
         fcl::Transform3d wTf1;
@@ -159,15 +165,15 @@ namespace robot_collision_checking
                                                 std::vector<Eigen::Vector3d> &wP1,
                                                 std::vector<Eigen::Vector3d> &wPobjs)
     {
-
+        unsigned int world_size = fcl_collision_world.size();
         id_collision_objects.clear();
-        id_collision_objects.resize(fcl_collision_world.size());
+        id_collision_objects.resize(world_size);
         wP1.clear();
-        wP1.resize(fcl_collision_world.size());
+        wP1.resize(world_size);
         wPobjs.clear();
-        wPobjs.resize(fcl_collision_world.size());
+        wPobjs.resize(world_size);
         objs_distance.clear();
-        objs_distance.resize(fcl_collision_world.size());
+        objs_distance.resize(world_size);
 
         FCLCollisionGeometryPtr cg = FCLInterface::createCollisionGeometry(s1);
         fcl::Transform3d wTf1;
@@ -177,7 +183,7 @@ namespace robot_collision_checking
     }
 
     double FCLInterface::checkMinimumDistanceObjectWorld(const shape_msgs::SolidPrimitive &s1,
-                                                        const Eigen::Affine3d &wT1)
+                                                         const Eigen::Affine3d &wT1)
     {
 
         FCLCollisionGeometryPtr cg = FCLInterface::createCollisionGeometry(s1);
@@ -189,7 +195,7 @@ namespace robot_collision_checking
     }
 
     double FCLInterface::checkMinimumDistanceObjectWorld(const shape_msgs::Mesh &s1,
-                                                        const Eigen::Affine3d &wT1)
+                                                         const Eigen::Affine3d &wT1)
     {
 
         FCLCollisionGeometryPtr cg = FCLInterface::createCollisionGeometry(s1);
@@ -203,7 +209,8 @@ namespace robot_collision_checking
     double FCLInterface::checkMinimumDistanceObjectWorld(FCLCollisionObjectPtr o1)
     {
         double min_distance(100);
-        for (unsigned int i = 0; i < fcl_collision_world.size(); i++)
+        unsigned int world_size = fcl_collision_world.size();
+        for (unsigned int i = 0; i < world_size; i++)
         {
             fcl::DistanceRequestd dist_req;
             dist_req.enable_nearest_points = true;
@@ -215,9 +222,9 @@ namespace robot_collision_checking
             dist_req.gjk_solver_type = fcl::GJKSolverType::GST_LIBCCD;
 
             fcl::distance(o1.get(),
-                        fcl_collision_world[i]->collision_object.get(),
-                        dist_req,
-                        dist_result);
+                          fcl_collision_world[i]->collision_object.get(),
+                          dist_req,
+                          dist_result);
 
             if (min_distance > dist_result.min_distance)
             {
@@ -275,15 +282,15 @@ namespace robot_collision_checking
     }
 
     bool FCLInterface::addCollisionObject(FCLObject &object,
-                                        unsigned int object_id)
+                                          unsigned int object_id)
     {
         addCollisionObject(object.object_shape, object.object_transform, object_id);
         return true;
     }
 
     bool FCLInterface::addCollisionObject(const shape_msgs::SolidPrimitive &s1,
-                                        const Eigen::Affine3d &wT1,
-                                        unsigned int object_id)
+                                          const Eigen::Affine3d &wT1,
+                                          unsigned int object_id)
     {
         FCLCollisionGeometryPtr cg = FCLInterface::createCollisionGeometry(s1);
         fcl::Transform3d wTf1;
@@ -300,7 +307,7 @@ namespace robot_collision_checking
     }
 
     bool FCLInterface::addCollisionObject(const shape_msgs::Plane &s1,
-                                        const Eigen::Affine3d &wT1, unsigned int object_id)
+                                          const Eigen::Affine3d &wT1, unsigned int object_id)
     {
 
         FCLCollisionGeometryPtr cg = FCLInterface::createCollisionGeometry(s1);
@@ -318,16 +325,13 @@ namespace robot_collision_checking
     }
 
     bool FCLInterface::addCollisionObject(const shape_msgs::Mesh &s1,
-                                        const Eigen::Affine3d &wT1, unsigned int object_id)
+                                          const Eigen::Affine3d &wT1, unsigned int object_id)
     {
 
         FCLCollisionGeometryPtr cg = FCLInterface::createCollisionGeometry(s1);
-
         fcl::Transform3d wTf1;
         FCLInterface::transform2fcl(wT1, wTf1);
-
         FCLCollisionObjectPtr o1 = std::make_shared<fcl::CollisionObjectd>(cg, wTf1);
-        std::cout << "Mesh count" << o1.use_count() << std::endl;
 
         FCLInterfaceCollisionObject *new_col_object(new FCLInterfaceCollisionObject());
         new_col_object->collision_object = o1;
@@ -340,8 +344,8 @@ namespace robot_collision_checking
 
     // Adding octomap here
     bool FCLInterface::addCollisionObject(const octomap_msgs::Octomap &map,
-                                        const Eigen::Affine3d &wT1,
-                                        unsigned int object_id)
+                                          const Eigen::Affine3d &wT1,
+                                          unsigned int object_id)
     {
         FCLCollisionGeometryPtr cg = FCLInterface::createCollisionGeometry(map);
         fcl::Transform3d wTf1;
@@ -356,9 +360,78 @@ namespace robot_collision_checking
         return true;
     }
 
+    // Adding voxel grid here
+    bool FCLInterface::addCollisionObject(const costmap_2d::VoxelGrid &grid,
+                                          const Eigen::Affine3d &wT1,
+                                          unsigned int object_id)
+    {
+        const uint32_t *data = &grid.data.front();
+        const double x_origin = grid.origin.x;
+        const double y_origin = grid.origin.y;
+        const double z_origin = grid.origin.z;
+        const double x_res = grid.resolutions.x;
+        const double y_res = grid.resolutions.y;
+        const double z_res = grid.resolutions.z;
+        const uint32_t x_size = grid.size_x;
+        const uint32_t y_size = grid.size_y;
+        const uint32_t z_size = grid.size_z;
+
+        for (uint32_t y_grid = 0; y_grid < y_size; ++y_grid)
+        {
+            for (uint32_t x_grid = 0; x_grid < x_size; ++x_grid)
+            {
+                for (uint32_t z_grid = 0; z_grid < z_size; ++z_grid)
+                {
+                    voxel_grid::VoxelStatus status = voxel_grid::VoxelGrid::getVoxel(x_grid, y_grid, z_grid,
+                                                                                     x_size, y_size, z_size, data);
+
+                    if (status == voxel_grid::MARKED)
+                    {
+                        // Center point of the cell
+                        double x = x_origin + (x_grid + 0.5) * x_res;
+                        double y = y_origin + (y_grid + 0.5) * y_res;
+                        double z = z_origin + (z_grid + 0.5) * z_res;
+                        Eigen::Vector3d center(x, y, z);
+
+                        // Translate to origin of cell
+                        Eigen::Vector3d box_trans = wT1 * center;
+                        Eigen::Affine3d wTv = wT1;
+                        wTv.translate(center);
+
+                        fcl::Transform3d wTf1;
+                        FCLInterface::transform2fcl(wTv, wTf1);
+
+                        // Make collision geometry
+                        Eigen::Vector3d side(x_res, y_res, z_res);
+                        FCLCollisionGeometryPtr cg = std::make_shared<fcl::Boxd>(side);
+                        FCLCollisionObjectPtr o1 = std::make_shared<fcl::CollisionObjectd>(cg, wTf1);
+
+                        FCLInterfaceCollisionObject *new_col_object(new FCLInterfaceCollisionObject());
+                        new_col_object->collision_object = o1;
+                        new_col_object->object_type = VOXEL_GRID_INT;
+                        new_col_object->collision_id = object_id;
+
+                        // shape_msgs::SolidPrimitive s1;
+                        // s1.type = shape_msgs::SolidPrimitive::BOX;
+                        // s1.dimensions.resize(3);
+                        // s1.dimensions[shape_msgs::SolidPrimitive::BOX_X] = x_res;
+                        // s1.dimensions[shape_msgs::SolidPrimitive::BOX_Y] = y_res;
+                        // s1.dimensions[shape_msgs::SolidPrimitive::BOX_Z] = z_res;
+                        // new_col_object->solid = s1;
+
+                        fcl_collision_world.push_back(std::unique_ptr<FCLInterfaceCollisionObject>(new_col_object));
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     bool FCLInterface::removeCollisionObject(unsigned int object_id)
     {
-        for (unsigned int i = 0; i < fcl_collision_world.size(); i++)
+        unsigned int world_size = fcl_collision_world.size();
+        for (unsigned int i = 0; i < world_size; i++)
         {
             if (object_id == fcl_collision_world[i]->collision_id)
             {
@@ -369,9 +442,37 @@ namespace robot_collision_checking
         return false;
     }
 
+    bool FCLInterface::removeVoxelGridObject(unsigned int object_id)
+    {
+        unsigned int world_size = fcl_collision_world.size();
+        // Assumes contingent cells
+        unsigned int j = 0;
+        for (auto it = fcl_collision_world.begin(); it != fcl_collision_world.end(); /*it++*/)
+        {
+            if (object_id == (*it)->collision_id)
+            {
+                it = fcl_collision_world.erase(it);
+                j++;
+            }
+            else
+            {
+                ++it;
+            }
+        }
+
+        if (j > 0)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     bool FCLInterface::displayMarker(shape_msgs::SolidPrimitive s1,
-                                    const Eigen::Affine3d &T,
-                                    unsigned int obj_id, Eigen::Vector4d color)
+                                     const Eigen::Affine3d &T,
+                                     unsigned int obj_id, Eigen::Vector4d color)
     {
         visualization_msgs::Marker mkr;
         geometric_shapes::constructMarkerFromShape(s1, mkr);
@@ -413,9 +514,9 @@ namespace robot_collision_checking
             ros::Duration(0.1).sleep();
         }
 
-        for (unsigned int i = 0; i < fcl_collision_world.size(); i++)
+        unsigned int world_size = fcl_collision_world.size();
+        for (unsigned int i = 0; i < world_size; i++)
         {
-
             fcl::Transform3d wTf2 = fcl_collision_world[i]->collision_object->getTransform();
 
             mkr.id = fcl_collision_world[i]->collision_id;
@@ -431,9 +532,13 @@ namespace robot_collision_checking
             {
                 ROS_WARN("Unable to display octomap");
             }
+            else if (fcl_collision_world[i]->object_type == VOXEL_GRID_INT)
+            {
+                // geometric_shapes::constructMarkerFromShape(fcl_collision_world[i]->solid, mkr);
+            }
             else if (fcl_collision_world[i]->object_type == shape_msgs::SolidPrimitive::SPHERE ||
-                    fcl_collision_world[i]->object_type == shape_msgs::SolidPrimitive::BOX ||
-                    fcl_collision_world[i]->object_type == shape_msgs::SolidPrimitive::CYLINDER)
+                     fcl_collision_world[i]->object_type == shape_msgs::SolidPrimitive::BOX ||
+                     fcl_collision_world[i]->object_type == shape_msgs::SolidPrimitive::CYLINDER)
             {
                 geometric_shapes::constructMarkerFromShape(fcl_collision_world[i]->solid, mkr);
             }
@@ -460,26 +565,26 @@ namespace robot_collision_checking
         return true;
     }
 
-    // Plane is defined as a x + by + cz + d = 0;
     FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry(const shape_msgs::Mesh &s1)
     {
-
         std::shared_ptr<fcl::BVHModel<fcl::OBBRSSd>> g(new fcl::BVHModel<fcl::OBBRSSd>());
 
-        if (s1.vertices.size() > 0 && s1.triangles.size() > 0)
+        unsigned int vert_size = s1.vertices.size();
+        unsigned int tri_size = s1.triangles.size();
+        if (vert_size > 0 && tri_size > 0)
         {
-            std::vector<fcl::Triangle> tri_indices(s1.triangles.size());
-            std::vector<fcl::Vector3d> points(s1.vertices.size());
+            std::vector<fcl::Triangle> tri_indices(tri_size);
+            std::vector<fcl::Vector3d> points(vert_size);
 
-            for (unsigned int i = 0; i < s1.triangles.size(); ++i)
+            for (unsigned int i = 0; i < tri_size; ++i)
             {
                 tri_indices[i] =
                     fcl::Triangle(s1.triangles[i].vertex_indices[0],
-                                s1.triangles[i].vertex_indices[1],
-                                s1.triangles[i].vertex_indices[2]);
+                                  s1.triangles[i].vertex_indices[1],
+                                  s1.triangles[i].vertex_indices[2]);
             }
 
-            for (unsigned int i = 0; i < s1.vertices.size(); ++i)
+            for (unsigned int i = 0; i < vert_size; ++i)
             {
                 points[i] = fcl::Vector3d(s1.vertices[i].x, s1.vertices[i].y, s1.vertices[i].z);
             }
@@ -502,7 +607,7 @@ namespace robot_collision_checking
         return FCLCollisionGeometryPtr(new fcl::OcTreed(tree));
     }
 
-    // Plane is defined as a x + by + cz + d = 0;
+    // Plane is defined as ax + by + cz + d = 0;
     FCLCollisionGeometryPtr FCLInterface::createCollisionGeometry(const shape_msgs::Plane &s1)
     {
         return FCLCollisionGeometryPtr(
@@ -522,8 +627,8 @@ namespace robot_collision_checking
         {
 
             return std::make_shared<fcl::Boxd>(s1.dimensions[shape_msgs::SolidPrimitive::BOX_X],
-                                            s1.dimensions[shape_msgs::SolidPrimitive::BOX_Y],
-                                            s1.dimensions[shape_msgs::SolidPrimitive::BOX_Z]);
+                                               s1.dimensions[shape_msgs::SolidPrimitive::BOX_Y],
+                                               s1.dimensions[shape_msgs::SolidPrimitive::BOX_Z]);
         }
         else if (s1.type == shape_msgs::SolidPrimitive::CONE)
         {
